@@ -1,10 +1,13 @@
 import express from 'express';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import cors from 'cors';
+
 
 dotenv.config(); // Load .env variables
 
 const app = express();
+app.use(cors()); 
 const PORT = process.env.PORT || 3000;
 
 // Set up a PostgreSQL connection pool
@@ -16,7 +19,6 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-// Test route that fetches 5 crash records
 app.get('/crashes', async (req, res) => {
   try {
     const result = await pool.query(`
