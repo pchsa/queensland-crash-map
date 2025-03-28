@@ -17,9 +17,13 @@ const pool = new Pool({
 });
 
 // Test route that fetches 5 crash records
-app.get('/api/crashes', async (req, res) => {
+app.get('/crashes', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM crashes LIMIT 5');
+    const result = await pool.query(`
+      SELECT crash_ref_number, crash_severity, crash_year, crash_month, crash_day_of_week, crash_hour, crash_longitude, crash_latitude
+      FROM crashes
+      WHERE crash_year = '2023' and loc_post_code = '4122';  
+    `);
     res.json(result.rows);
   } catch (err) {
     console.error('Database error:', err);
