@@ -9,3 +9,9 @@ export type Crash = {
   crash_longitude: number;
   crash_latitude: number;
 };
+
+export type CrashQuery = {
+  startDate: string; // format: 'YYYY-MM'
+  endDate: string;   // format: 'YYYY-MM'
+  location: string[]; // format: ['suburb:Brisbane', 'lga:Logan']
+}

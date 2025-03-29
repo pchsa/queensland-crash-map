@@ -3,7 +3,7 @@ import { LatLngExpression } from 'leaflet';
 import { useCrashStore } from '../store';
 import { useEffect } from 'react';
 import { fetchCrashes } from '../api';
-import MarkerClusterGroup from 'react-leaflet-cluster';
+import MarkerClusterGroup from "react-leaflet-markercluster";
 
 
 function MapView() {
@@ -11,7 +11,11 @@ function MapView() {
   const setCrashes = useCrashStore((s) => s.setCrashes);
 
   useEffect(() => {
-    fetchCrashes().then(setCrashes).catch(console.error);
+    fetchCrashes({
+      startDate: '2021-05',
+      endDate: '2023-12',
+      location: ['suburb:mansfield']
+    }).then(setCrashes).catch(console.error);
   }, []);
 
   return (

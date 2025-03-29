@@ -28,7 +28,7 @@ app.get('/crashes', async (req, res) => {
     return;
   }
 
-  // validate time
+  // Validate location
   if (!location) {
     res.status(400).json({ error: 'location is required' });
     return;
