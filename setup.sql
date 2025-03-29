@@ -80,3 +80,24 @@ CREATE INDEX idx_crash_date ON crashes(crash_date);
 -- load suburbs
 shp2pgsql -s 7844 -I Locality_Boundaries.shp localities | psql -h localhost -U postgres -d qld_crashes
 
+
+-- address duplicates in locality field
+ALTER TABLE localities
+ALTER COLUMN locality TYPE VARCHAR(100);
+
+UPDATE localities
+SET locality = INITCAP(locality) || ' - ' || INITCAP(
+    TRIM(
+        REGEXP_REPLACE(
+            SPLIT_PART(aminarean, ',', 2),
+            '\s+\w+$', '', -- remove last word (e.g. 'City', 'Regional')
+            ''
+        )
+    )
+)
+WHERE locality IN (
+    SELECT locality
+    FROM localities
+    GROUP BY locality
+    HAVING COUNT(*) > 1
+);
