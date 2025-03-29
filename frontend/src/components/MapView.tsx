@@ -4,6 +4,9 @@ import { useCrashStore } from '../store';
 import { useEffect } from 'react';
 import { fetchCrashes } from '../api';
 import MarkerClusterGroup from "react-leaflet-markercluster";
+import AreaSelect from './AreaSelect';
+import "leaflet-area-select";
+
 
 
 function MapView() {
@@ -28,6 +31,8 @@ function MapView() {
     url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
     attribution='&copy; OpenStreetMap contributors'
   />
+  <AreaSelect />
+
 
   <MarkerClusterGroup>
     {crashes.map((crash) => {
