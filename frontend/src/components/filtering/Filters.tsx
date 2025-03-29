@@ -1,3 +1,4 @@
+import { Button } from "@mantine/core";
 import DateSelect from "./DateSelect";
 import { LocationSelect } from "./LocationSelect";
 import SeveritySelect from "./SeveritySelect";
@@ -7,6 +8,7 @@ function Filters () {
         <LocationSelect />
         <DateSelect />
         <SeveritySelect />
+        <Button>Submit</Button>
     </div>);
 }
 
