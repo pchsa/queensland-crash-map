@@ -75,4 +75,8 @@ ADD COLUMN crash_date DATE;
 UPDATE crashes
 SET crash_date = TO_DATE(crash_month || ' ' || crash_year, 'Month YYYY');
 
-CREATE INDEX idx_crash_date ON crash_data(crash_date);
+CREATE INDEX idx_crash_date ON crashes(crash_date);
+
+-- load suburbs
+shp2pgsql -s 7844 -I Locality_Boundaries.shp localities | psql -h localhost -U postgres -d qld_crashes
+
