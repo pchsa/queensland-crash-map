@@ -1,13 +1,13 @@
-import express from 'express';
-import { Pool } from 'pg';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import SQL, { SQLStatement } from 'sql-template-strings';
+import express from "express";
+import { Pool } from "pg";
+import dotenv from "dotenv";
+import cors from "cors";
+import SQL, { SQLStatement } from "sql-template-strings";
 
 dotenv.config(); // Load .env variables
 
 const app = express();
-app.use(cors()); 
+app.use(cors());
 const PORT = process.env.PORT || 3000;
 
 // Set up a PostgreSQL connection
@@ -19,18 +19,25 @@ const pg = new Pool({
   database: process.env.DB_NAME,
 });
 
-app.get('/crashes', async (req, res) => {
+app.get("/crashes", async (req, res) => {
   const { startDate, endDate, location } = req.query;
 
   // Validate dates
-  if (!startDate || !endDate || typeof startDate !== 'string' || typeof endDate !== 'string') {
-    res.status(400).json({ error: 'startDate and endDate required in YYYY-MM format' });
+  if (
+    !startDate ||
+    !endDate ||
+    typeof startDate !== "string" ||
+    typeof endDate !== "string"
+  ) {
+    res
+      .status(400)
+      .json({ error: "startDate and endDate required in YYYY-MM format" });
     return;
   }
 
   // Validate location
   if (!location) {
-    res.status(400).json({ error: 'location is required' });
+    res.status(400).json({ error: "location is required" });
     return;
   }
 
@@ -43,10 +50,10 @@ app.get('/crashes', async (req, res) => {
 
     query.append(buildDateFilter(startDate, endDate));
 
-    const locationList: string[] = Array.isArray(location) 
-      ? location.map(loc => String(loc)) 
+    const locationList: string[] = Array.isArray(location)
+      ? location.map((loc) => String(loc))
       : [String(location)];
-    
+
     const locationFilters = buildLocationFilter(locationList);
 
     query.append(SQL` AND (`);
@@ -59,9 +66,21 @@ app.get('/crashes', async (req, res) => {
 
     res.json(result.rows);
   } catch (err) {
-    console.error('Database error:', err);
+    console.error("Database error:", err);
 
-    res.status(500).json({ error: 'Something went wrong' });
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+app.get("/suburbs/names", async (req, res) => {
+  try {
+    const result = await pg.query(
+      SQL`SELECT DISTINCT locality FROM localities`
+    );
+    res.json(result.rows.map((r) => r.locality));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not retrieve names" });
   }
 });
 
@@ -81,14 +100,16 @@ function buildLocationFilter(locations: string[]): SQLStatement[] {
   const filters: SQLStatement[] = [];
 
   for (const loc of locations) {
-    const [type, value] = loc.split(':');
-    
+    const [type, value] = loc.split(":");
+
     switch (type.toLowerCase()) {
-      case 'suburb':
+      case "suburb":
         filters.push(SQL`LOWER(Loc_Suburb) = ${value.toLowerCase()}`);
         break;
-      case 'lga':
-        filters.push(SQL`LOWER(Loc_Local_Government_Area) = ${value.toLowerCase()}`);
+      case "lga":
+        filters.push(
+          SQL`LOWER(Loc_Local_Government_Area) = ${value.toLowerCase()}`
+        );
         break;
     }
   }
