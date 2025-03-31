@@ -75,7 +75,7 @@ app.get("/crashes", async (req, res) => {
 app.get("/suburbs/names", async (req, res) => {
   try {
     const result = await pg.query(
-      SQL`SELECT DISTINCT locality FROM localities`
+      SQL`SELECT DISTINCT locality FROM localities ORDER BY locality`
     );
     res.json(result.rows.map((r) => r.locality));
   } catch (err) {

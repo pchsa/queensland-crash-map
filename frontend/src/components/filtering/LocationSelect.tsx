@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CheckIcon,
   Combobox,
@@ -7,24 +7,55 @@ import {
   PillsInput,
   useCombobox,
 } from "@mantine/core";
+import { fetchSuburbNames } from "../../api";
 
-const groceries = ["apples", "oranges", "bananas"];
+function getFilteredOptions(
+  data: string[],
+  searchQuery: string,
+  limit: number
+) {
+  const result: string[] = [];
+
+  for (let i = 0; i < data.length; i += 1) {
+    if (result.length === limit) {
+      break;
+    }
+
+    if (data[i].toLowerCase().startsWith(searchQuery.trim().toLowerCase())) {
+      result.push(data[i]);
+    }
+  }
+
+  return result;
+}
 
 export function LocationSelect() {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
-    onDropdownOpen: () => combobox.updateSelectedOptionIndex("active"),
+    onDropdownOpen: () => combobox.selectFirstOption(),
   });
+
+  const [allSuburbs, setAllSuburbs] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchSuburbNames().then((suburbs) => {
+      console.log(suburbs);
+      setAllSuburbs(suburbs);
+      combobox.selectFirstOption();
+    });
+  }, []);
 
   const [search, setSearch] = useState("");
   const [value, setValue] = useState<string[]>([]);
 
-  const handleValueSelect = (val: string) =>
+  const handleValueSelect = (val: string) => {
     setValue((current) =>
       current.includes(val)
         ? current.filter((v) => v !== val)
         : [...current, val]
     );
+    setSearch("");
+  };
 
   const handleValueRemove = (val: string) =>
     setValue((current) => current.filter((v) => v !== val));
@@ -35,7 +66,9 @@ export function LocationSelect() {
     </Pill>
   ));
 
-  const options = groceries
+  const filteredOptions = getFilteredOptions(allSuburbs, search, 10);
+
+  const options = filteredOptions
     .filter((item) =>
       item.toLowerCase().startsWith(search.trim().toLowerCase())
     )
@@ -47,6 +80,11 @@ export function LocationSelect() {
         </Group>
       </Combobox.Option>
     ));
+
+  useEffect(() => {
+    // we need to wait for options to render before we can select first one
+    combobox.selectFirstOption();
+  }, [options]);
 
   return (
     <Combobox
@@ -67,9 +105,9 @@ export function LocationSelect() {
                 onFocus={() => combobox.openDropdown()}
                 onBlur={() => combobox.closeDropdown()}
                 value={search}
-                placeholder="Search for a location"
+                placeholder="Search for a suburb"
                 onChange={(event) => {
-                  combobox.updateSelectedOptionIndex();
+                  combobox.openDropdown();
                   setSearch(event.currentTarget.value);
                 }}
                 onKeyDown={(event) => {
@@ -84,7 +122,7 @@ export function LocationSelect() {
         </PillsInput>
       </Combobox.DropdownTarget>
 
-      <Combobox.Dropdown>
+      <Combobox.Dropdown hidden={search.length === 0}>
         <Combobox.Options>
           {options.length > 0 ? (
             options

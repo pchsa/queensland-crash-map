@@ -101,3 +101,8 @@ WHERE locality IN (
     GROUP BY locality
     HAVING COUNT(*) > 1
 );
+
+-- handle null value
+UPDATE localities
+SET locality = 'Gulf of Carpentaria'
+WHERE locality IS NULL;

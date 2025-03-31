@@ -14,7 +14,7 @@ export async function fetchCrashes(params: CrashQuery): Promise<Crash[]> {
   return res.data;
 }
 
-export async function fetchSuburbNames(): Promise<String[]> {
-  const res = await axios.get<String[]>(`${API_BASE}/suburbs/names`);
+export async function fetchSuburbNames(): Promise<string[]> {
+  const res = await axios.get<string[]>(`${API_BASE}/suburbs/names`);
   return res.data;
 }
