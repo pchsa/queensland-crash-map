@@ -15,7 +15,7 @@ function MapView() {
     fetchCrashes({
       startDate: "2021-05",
       endDate: "2023-12",
-      location: ["suburb:mansfield"],
+      location: ["locality:mansfield"],
     })
       .then(setCrashes)
       .catch(console.error);

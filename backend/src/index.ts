@@ -43,9 +43,9 @@ app.get("/crashes", async (req, res) => {
 
   try {
     const query = SQL`
-      SELECT crash_ref_number, crash_severity, crash_year, crash_month, crash_day_of_week, crash_hour, crash_longitude, crash_latitude
-      FROM crashes
-      WHERE
+      SELECT C.crash_ref_number, C.crash_severity, C.crash_year, C.crash_month, C.crash_day_of_week, C.crash_hour, C.crash_longitude, C.crash_latitude
+      FROM crashes as C, localities as L
+      WHERE ST_Within(C.geom, L.geom) AND
     `;
 
     query.append(buildDateFilter(startDate, endDate));
@@ -72,7 +72,7 @@ app.get("/crashes", async (req, res) => {
   }
 });
 
-app.get("/suburbs/names", async (req, res) => {
+app.get("/localities/names", async (req, res) => {
   try {
     const result = await pg.query(
       SQL`SELECT DISTINCT locality FROM localities ORDER BY locality`
@@ -103,13 +103,8 @@ function buildLocationFilter(locations: string[]): SQLStatement[] {
     const [type, value] = loc.split(":");
 
     switch (type.toLowerCase()) {
-      case "suburb":
-        filters.push(SQL`LOWER(Loc_Suburb) = ${value.toLowerCase()}`);
-        break;
-      case "lga":
-        filters.push(
-          SQL`LOWER(Loc_Local_Government_Area) = ${value.toLowerCase()}`
-        );
+      case "locality":
+        filters.push(SQL`LOWER(L.locality) = ${value.toLowerCase()}`);
         break;
     }
   }
