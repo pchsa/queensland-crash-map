@@ -8,6 +8,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { fetchSuburbNames } from "../../api";
+import { useFilterStore } from "../../store";
 
 function getFilteredOptions(
   data: string[],
@@ -70,28 +71,27 @@ export function LocationSelect() {
 
   const [allSuburbs, setAllSuburbs] = useState<string[]>([]);
   const [search, setSearch] = useState("");
-  const [value, setValue] = useState<string[]>([]);
+  const { location, setLocation } = useFilterStore();
 
   // fetch suburb names for autocomplete
   useEffect(() => {
     fetchSuburbNames().then((suburbs) => {
-      console.log(suburbs);
       setAllSuburbs(suburbs);
       combobox.selectFirstOption();
     });
   }, []);
 
   const handleValueSelect = (val: string) => {
-    setValue((current) =>
-      current.includes(val)
-        ? current.filter((v) => v !== val)
-        : [...current, val]
+    setLocation(
+      location.includes(val)
+        ? location.filter((v) => v !== val)
+        : [...location, val]
     );
     setSearch("");
   };
 
   const handleValueRemove = (val: string) =>
-    setValue((current) => current.filter((v) => v !== val));
+    setLocation(location.filter((v) => v !== val));
 
   const filteredOptions = getFilteredOptions(allSuburbs, search, 10);
 
@@ -112,7 +112,7 @@ export function LocationSelect() {
           onClick={() => combobox.openDropdown()}
         >
           <Pill.Group>
-            <SelectedPills values={value} onRemove={handleValueRemove} />
+            <SelectedPills values={location} onRemove={handleValueRemove} />
 
             <Combobox.EventsTarget>
               <PillsInput.Field
@@ -127,7 +127,7 @@ export function LocationSelect() {
                 onKeyDown={(event) => {
                   if (event.key === "Backspace" && search.length === 0) {
                     event.preventDefault();
-                    handleValueRemove(value[value.length - 1]);
+                    handleValueRemove(location[location.length - 1]);
                   }
                 }}
               />
@@ -139,7 +139,7 @@ export function LocationSelect() {
       <Combobox.Dropdown hidden={search.length === 0}>
         <Combobox.Options>
           {filteredOptions.length > 0 ? (
-            <SuburbOptions options={filteredOptions} selected={value} />
+            <SuburbOptions options={filteredOptions} selected={location} />
           ) : (
             <Combobox.Empty>Nothing found...</Combobox.Empty>
           )}

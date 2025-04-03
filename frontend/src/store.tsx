@@ -19,8 +19,8 @@ type FilterState = {
   setSeverity: (severity: string[]) => void;
   location: string[];
   setLocation: (location: string[]) => void;
-  dateRange: [Date | null, Date | null];
-  setDateRange: (dateRange: [Date | null, Date | null]) => void;
+  dateRange: [Date, Date];
+  setDateRange: (dateRange: [Date, Date]) => void;
 };
 
 export const useFilterStore = create<FilterState>((set) => ({
@@ -28,6 +28,6 @@ export const useFilterStore = create<FilterState>((set) => ({
   setSeverity: (severity) => set({ severity }),
   location: [],
   setLocation: (location) => set({ location }),
-  dateRange: [null, null],
+  dateRange: [new Date(2023, 0, 1), new Date(2023, 11, 1)],
   setDateRange: (dateRange) => set({ dateRange }),
 }));
