@@ -12,14 +12,25 @@ function Filters() {
 
   const handleSubmit = () => {
     // do something with selected filters here
+    if (location.length == 0) {
+      console.log("must include location");
+      return;
+    }
+
+    if (!dateRange[0] || !dateRange[1]) {
+      console.log("must include date range");
+      return;
+    }
+
     console.log("Submit clicked");
     const queryLocation = location.map((loc) =>
       !loc.startsWith("Custom Area") ? `locality:${loc}` : `muhahah`
     );
 
     const queryDateRange = dateRange.map((date) =>
-      date.toISOString().slice(0, 7)
+      date ? date.toISOString().slice(0, 7) : null
     );
+
     console.log({
       startDate: queryDateRange[0],
       endDate: queryDateRange[1],
