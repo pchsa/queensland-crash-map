@@ -17,9 +17,7 @@ function getFilteredOptions(
   const result: string[] = [];
 
   for (let i = 0; i < data.length; i += 1) {
-    if (result.length === limit) {
-      break;
-    }
+    if (result.length === limit) break;
 
     if (data[i].toLowerCase().startsWith(searchQuery.trim().toLowerCase())) {
       result.push(data[i]);
@@ -29,6 +27,41 @@ function getFilteredOptions(
   return result;
 }
 
+function SelectedPills({
+  values,
+  onRemove,
+}: {
+  values: string[];
+  onRemove: (val: string) => void;
+}) {
+  return (
+    <>
+      {values.map((item) => (
+        <Pill key={item} withRemoveButton onRemove={() => onRemove(item)}>
+          {item}
+        </Pill>
+      ))}
+    </>
+  );
+}
+
+function SuburbOptions({
+  options,
+  selected,
+}: {
+  options: string[];
+  selected: string[];
+}) {
+  return options.map((item) => (
+    <Combobox.Option value={item} key={item} active={selected.includes(item)}>
+      <Group gap="sm">
+        {selected.includes(item) && <CheckIcon size={12} />}
+        <span>{item}</span>
+      </Group>
+    </Combobox.Option>
+  ));
+}
+
 export function LocationSelect() {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -36,7 +69,10 @@ export function LocationSelect() {
   });
 
   const [allSuburbs, setAllSuburbs] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
+  const [value, setValue] = useState<string[]>([]);
 
+  // fetch suburb names for autocomplete
   useEffect(() => {
     fetchSuburbNames().then((suburbs) => {
       console.log(suburbs);
@@ -44,9 +80,6 @@ export function LocationSelect() {
       combobox.selectFirstOption();
     });
   }, []);
-
-  const [search, setSearch] = useState("");
-  const [value, setValue] = useState<string[]>([]);
 
   const handleValueSelect = (val: string) => {
     setValue((current) =>
@@ -60,31 +93,12 @@ export function LocationSelect() {
   const handleValueRemove = (val: string) =>
     setValue((current) => current.filter((v) => v !== val));
 
-  const values = value.map((item) => (
-    <Pill key={item} withRemoveButton onRemove={() => handleValueRemove(item)}>
-      {item}
-    </Pill>
-  ));
-
   const filteredOptions = getFilteredOptions(allSuburbs, search, 10);
-
-  const options = filteredOptions
-    .filter((item) =>
-      item.toLowerCase().startsWith(search.trim().toLowerCase())
-    )
-    .map((item) => (
-      <Combobox.Option value={item} key={item} active={value.includes(item)}>
-        <Group gap="sm">
-          {value.includes(item) ? <CheckIcon size={12} /> : null}
-          <span>{item}</span>
-        </Group>
-      </Combobox.Option>
-    ));
 
   useEffect(() => {
     // we need to wait for options to render before we can select first one
     combobox.selectFirstOption();
-  }, [options]);
+  }, [filteredOptions]);
 
   return (
     <Combobox
@@ -98,7 +112,7 @@ export function LocationSelect() {
           onClick={() => combobox.openDropdown()}
         >
           <Pill.Group>
-            {values}
+            <SelectedPills values={value} onRemove={handleValueRemove} />
 
             <Combobox.EventsTarget>
               <PillsInput.Field
@@ -124,8 +138,8 @@ export function LocationSelect() {
 
       <Combobox.Dropdown hidden={search.length === 0}>
         <Combobox.Options>
-          {options.length > 0 ? (
-            options
+          {filteredOptions.length > 0 ? (
+            <SuburbOptions options={filteredOptions} selected={value} />
           ) : (
             <Combobox.Empty>Nothing found...</Combobox.Empty>
           )}
