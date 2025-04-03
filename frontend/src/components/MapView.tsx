@@ -1,25 +1,12 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
 import { useCrashStore } from "../store";
-import { useEffect } from "react";
-import { fetchCrashes } from "../api";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import AreaSelect from "./AreaSelect";
 import "leaflet-area-select";
 
 function MapView() {
   const crashes = useCrashStore((s) => s.crashes);
-  const setCrashes = useCrashStore((s) => s.setCrashes);
-
-  useEffect(() => {
-    fetchCrashes({
-      startDate: "2021-05",
-      endDate: "2023-12",
-      location: ["locality:mansfield"],
-    })
-      .then(setCrashes)
-      .catch(console.error);
-  }, []);
 
   return (
     <MapContainer
