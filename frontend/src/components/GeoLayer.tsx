@@ -9,7 +9,7 @@ function GeoLayer() {
   const { location } = useFilterStore();
 
   // Store previously added layers in a ref
-  const layerMapRef = useRef<Record<string, L.GeoJSON>>({});
+  const layerMapRef = useRef<Record<string, L.GeoJSON | L.Rectangle>>({});
 
   useEffect(() => {
     const current = new Set(location);
@@ -27,9 +27,29 @@ function GeoLayer() {
     Promise.all(
       location.map(async (loc) => {
         if (!layerMap[loc]) {
-          const geojson = await fetchSuburbGeoData(loc);
-          const layer = L.geoJSON(geojson).addTo(map);
-          layerMap[loc] = layer;
+          if (loc.startsWith("Bounding Box #")) {
+            const [, bboxStr] = loc.split(":");
+            const [minLng, minLat, maxLng, maxLat] = bboxStr
+              .split(",")
+              .map(parseFloat);
+
+            const bounds = L.latLngBounds(
+              L.latLng(minLat, minLng),
+              L.latLng(maxLat, maxLng)
+            );
+
+            const rectangle = L.rectangle(bounds, {
+              color: "red",
+              weight: 1,
+              fillOpacity: 0.1,
+            }).addTo(map);
+
+            layerMap[loc] = rectangle;
+          } else {
+            const geojson = await fetchSuburbGeoData(loc);
+            const layer = L.geoJSON(geojson).addTo(map);
+            layerMap[loc] = layer;
+          }
         }
       })
     ).then(() => {

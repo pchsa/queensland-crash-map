@@ -22,7 +22,7 @@ type FilterState = {
   dateRange: [Date | null, Date | null];
   setDateRange: (dateRange: [Date | null, Date | null]) => void;
   bboxCounter: number;
-  incrementBboxCounter: () => void;
+  addBoundingBox: (bbox: string) => void;
 };
 
 export const useFilterStore = create<FilterState>((set) => ({
@@ -33,6 +33,12 @@ export const useFilterStore = create<FilterState>((set) => ({
   dateRange: [new Date(2023, 0, 1), new Date(2023, 11, 1)],
   setDateRange: (dateRange) => set({ dateRange }),
   bboxCounter: 1,
-  incrementBboxCounter: () =>
-    set((state) => ({ bboxCounter: state.bboxCounter + 1 })),
+  addBoundingBox: (bbox: string) =>
+    set((state) => ({
+      location: [
+        ...state.location,
+        `Bounding Box #${state.bboxCounter}:${bbox}`,
+      ],
+      bboxCounter: state.bboxCounter + 1,
+    })),
 }));
