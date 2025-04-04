@@ -84,6 +84,19 @@ app.get("/localities/names", async (req, res) => {
   }
 });
 
+app.get("/localities/geodata", async (req, res) => {
+  try {
+    const { locality } = req.query;
+    const result = await pg.query(
+      SQL`SELECT ST_AsGeoJSON(geom) as geom FROM localities WHERE locality = ${locality}`
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not retrieve geodata" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });

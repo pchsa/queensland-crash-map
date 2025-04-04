@@ -7,7 +7,7 @@ import { fetchCrashes } from "../../api";
 import { CrashQuery } from "../../types";
 
 function Filters() {
-  const { location, dateRange, severity } = useFilterStore();
+  const { location, dateRange } = useFilterStore();
   const { setCrashes } = useCrashStore();
 
   const handleSubmit = () => {
