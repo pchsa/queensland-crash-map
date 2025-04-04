@@ -42,30 +42,59 @@ app.get("/crashes", async (req, res) => {
   }
 
   try {
-    const query = SQL`
-      SELECT DISTINCT C.crash_ref_number, C.crash_severity, C.crash_year, C.crash_month, C.crash_day_of_week, C.crash_hour, C.crash_longitude, C.crash_latitude
-      FROM crashes as C, localities as L
-      WHERE 
-    `;
-
-    query.append(buildDateFilter(startDate, endDate));
-
     const locationList: string[] = Array.isArray(location)
       ? location.map((loc) => String(loc))
       : [String(location)];
 
-    query.append(SQL`AND (`);
     const localitiesFilter = buildLocalitiesFilter(locationList);
     const bboxFilter = buildBboxFilter(locationList);
 
-    query.append(localitiesFilter);
-    if (localitiesFilter.query.length > 0 && bboxFilter.query.length > 0)
-      query.append(SQL` OR `);
-    query.append(bboxFilter);
+    const dateFilter = buildDateFilter(startDate, endDate);
 
-    query.append(SQL`)`);
+    const queries: SQLStatement[] = [];
 
-    const result = await pg.query(query);
+    if (localitiesFilter.query.length > 0) {
+      const q = SQL`
+      SELECT C.crash_ref_number, C.crash_severity, C.crash_year,
+             C.crash_month, C.crash_day_of_week, C.crash_hour,
+             C.crash_longitude, C.crash_latitude
+      FROM crashes C
+      JOIN localities L ON ST_Within(C.geom, L.geom)
+      WHERE `;
+      q.append(dateFilter);
+      q.append(SQL`AND (`);
+      q.append(localitiesFilter);
+      q.append(SQL`)`);
+      queries.push(q);
+    }
+
+    if (bboxFilter.query.length > 0) {
+      const q = SQL`
+      SELECT C.crash_ref_number, C.crash_severity, C.crash_year,
+             C.crash_month, C.crash_day_of_week, C.crash_hour,
+             C.crash_longitude, C.crash_latitude
+      FROM crashes C
+      JOIN localities L ON ST_Within(C.geom, L.geom)
+      WHERE `;
+      q.append(dateFilter);
+      q.append(SQL`AND (`);
+      q.append(bboxFilter);
+      q.append(SQL`)`);
+      queries.push(q);
+    }
+
+    let finalQuery = SQL``;
+
+    if (queries.length === 2) {
+      finalQuery.append(queries[0]);
+      finalQuery.append(SQL` UNION `);
+      finalQuery.append(queries[1]);
+    } else {
+      console.log(queries[0]);
+      finalQuery = queries[0]; // only one was needed
+    }
+
+    const result = await pg.query(finalQuery);
 
     res.json(result.rows);
   } catch (err) {
