@@ -22,14 +22,20 @@ function Filters() {
       return;
     }
 
-    console.log("Submit clicked");
     const queryLocation = location.map((loc) =>
-      !loc.startsWith("Custom Area") ? `locality:${loc}` : `muhahah`
+      !loc.startsWith("Bounding Box #")
+        ? `locality:${loc}`
+        : `bbox:${loc.split(":")[1]}`
     );
 
-    const queryDateRange = dateRange.map((date) =>
-      date ? date.toISOString().slice(0, 7) : null
-    );
+    const queryDateRange = dateRange.map((date) => {
+      if (!date) return null;
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const yyyyMM = `${year}-${month}`;
+      return yyyyMM;
+    });
 
     console.log({
       startDate: queryDateRange[0],
