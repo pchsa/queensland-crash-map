@@ -65,7 +65,6 @@ app.get("/crashes", async (req, res) => {
 
     query.append(SQL`)`);
 
-    console.log(query);
     const result = await pg.query(query);
 
     res.json(result.rows);
