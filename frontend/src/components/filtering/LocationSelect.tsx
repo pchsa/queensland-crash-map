@@ -39,7 +39,7 @@ function SelectedPills({
     <>
       {values.map((item) => (
         <Pill key={item} withRemoveButton onRemove={() => onRemove(item)}>
-          {item}
+          {item.startsWith("Bounding Box #") ? item.split(":")[0] : item}
         </Pill>
       ))}
     </>
