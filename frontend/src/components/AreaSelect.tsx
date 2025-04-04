@@ -10,12 +10,9 @@ export default function AreaSelect() {
     map.selectArea.enable();
 
     map.on("selectarea:selected", (e: any) => {
-      console.log(e.bounds); // lon, lat, lon, lat
-      const rectangle = L.rectangle(e.bounds, {
-        color: "red",
-        weight: 1,
-      }).addTo(map);
-      setTimeout(() => rectangle.remove(), 1000);
+      const sw = e.bounds.getSouthWest(); // L.LatLng
+      const ne = e.bounds.getNorthEast(); // L.LatLng
+      const bbox = `bbox:${sw.lng},${sw.lat},${ne.lng},${ne.lat}`;
     });
   }, []);
 

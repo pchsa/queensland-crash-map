@@ -21,6 +21,8 @@ type FilterState = {
   setLocation: (location: string[]) => void;
   dateRange: [Date | null, Date | null];
   setDateRange: (dateRange: [Date | null, Date | null]) => void;
+  bboxCounter: number;
+  incrementBboxCounter: () => void;
 };
 
 export const useFilterStore = create<FilterState>((set) => ({
@@ -30,4 +32,7 @@ export const useFilterStore = create<FilterState>((set) => ({
   setLocation: (location) => set({ location }),
   dateRange: [new Date(2023, 0, 1), new Date(2023, 11, 1)],
   setDateRange: (dateRange) => set({ dateRange }),
+  bboxCounter: 1,
+  incrementBboxCounter: () =>
+    set((state) => ({ bboxCounter: state.bboxCounter + 1 })),
 }));

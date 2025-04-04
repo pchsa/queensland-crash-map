@@ -1,4 +1,3 @@
-
 export type Crash = {
   crash_ref_number: string;
   crash_severity: string;
@@ -12,6 +11,11 @@ export type Crash = {
 
 export type CrashQuery = {
   startDate: string; // format: 'YYYY-MM'
-  endDate: string;   // format: 'YYYY-MM'
+  endDate: string; // format: 'YYYY-MM'
   location: string[]; // format: ['suburb:Brisbane', 'lga:Logan']
-}
+};
+
+export type Location = {
+  label: string;
+  queryString: string;
+};

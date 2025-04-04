@@ -20,7 +20,7 @@ function MapView() {
         attribution="&copy; OpenStreetMap contributors"
       />
       <AreaSelect />
-      <GeoLayer /> {/* ← only this was added */}
+      <GeoLayer />
       <MarkerClusterGroup>
         {crashes.map((crash) => {
           const position: LatLngExpression = [
