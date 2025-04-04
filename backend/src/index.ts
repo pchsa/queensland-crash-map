@@ -43,7 +43,7 @@ app.get("/crashes", async (req, res) => {
 
   try {
     const query = SQL`
-      SELECT C.crash_ref_number, C.crash_severity, C.crash_year, C.crash_month, C.crash_day_of_week, C.crash_hour, C.crash_longitude, C.crash_latitude
+      SELECT DISTINCT C.crash_ref_number, C.crash_severity, C.crash_year, C.crash_month, C.crash_day_of_week, C.crash_hour, C.crash_longitude, C.crash_latitude
       FROM crashes as C, localities as L
       WHERE 
     `;
@@ -55,7 +55,14 @@ app.get("/crashes", async (req, res) => {
       : [String(location)];
 
     query.append(SQL`AND (`);
-    query.append(buildLocalitiesFilter(locationList));
+    const localitiesFilter = buildLocalitiesFilter(locationList);
+    const bboxFilter = buildBboxFilter(locationList);
+
+    query.append(localitiesFilter);
+    if (localitiesFilter.query.length > 0 && bboxFilter.query.length > 0)
+      query.append(SQL` OR `);
+    query.append(bboxFilter);
+
     query.append(SQL`)`);
 
     console.log(query);
@@ -108,21 +115,46 @@ function buildDateFilter(startDate: string, endDate: string): SQLStatement {
 
 function buildLocalitiesFilter(locations: string[]): SQLStatement {
   const query = SQL``;
-  locations = locations.filter((loc) => loc.startsWith("locality:"));
+  const localities = locations.filter((loc) => loc.startsWith("locality:"));
 
-  if (locations.length == 0) {
+  if (localities.length == 0) {
     return query;
   }
 
   query.append(SQL`(ST_Within(C.geom, L.geom) AND (`);
-  for (const [index, loc] of locations.entries()) {
-    const [type, value] = loc.split(":");
+  for (const [index, loc] of localities.entries()) {
+    const value = loc.slice("locality:".length);
     if (index > 0) query.append(SQL` OR `);
     query.append(SQL`LOWER(L.locality) = ${value.toLowerCase()}`);
   }
   query.append(SQL`))`);
 
-  const filters: SQLStatement[] = [];
+  return query;
+}
+
+function buildBboxFilter(locations: string[]): SQLStatement {
+  const query = SQL``;
+  const bboxList = locations.filter((loc) => loc.startsWith("bbox:"));
+
+  if (bboxList.length == 0) {
+    return query;
+  }
+
+  query.append(SQL`(`);
+  for (const [index, loc] of bboxList.entries()) {
+    const value = loc.slice("bbox:".length);
+    const [minLng, minLat, maxLng, maxLat] = value.split(",").map(Number);
+
+    if (index > 0) query.append(SQL` OR `);
+
+    query.append(
+      SQL`ST_Within(
+        C.geom,
+        ST_Transform(ST_MakeEnvelope(${minLng}, ${minLat}, ${maxLng}, ${maxLat}, 4326), 7844)
+      )`
+    );
+  }
+  query.append(SQL`)`);
 
   return query;
 }
