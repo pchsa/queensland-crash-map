@@ -4,6 +4,7 @@ import { useCrashStore } from "../store";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import AreaSelect from "./AreaSelect";
 import "leaflet-area-select";
+import GeoLayer from "./GeoLayer";
 
 function MapView() {
   const crashes = useCrashStore((s) => s.crashes);
@@ -19,7 +20,7 @@ function MapView() {
         attribution="&copy; OpenStreetMap contributors"
       />
       <AreaSelect />
-
+      <GeoLayer /> {/* ← only this was added */}
       <MarkerClusterGroup>
         {crashes.map((crash) => {
           const position: LatLngExpression = [

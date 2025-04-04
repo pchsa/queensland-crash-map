@@ -88,9 +88,9 @@ app.get("/localities/geodata", async (req, res) => {
   try {
     const { locality } = req.query;
     const result = await pg.query(
-      SQL`SELECT ST_AsGeoJSON(geom) as geom FROM localities WHERE locality = ${locality}`
+      SQL`SELECT ST_AsGeoJSON(geom)::json as geom FROM localities WHERE locality = ${locality}`
     );
-    res.json(result.rows[0]);
+    res.json(result.rows[0].geom);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Could not retrieve geodata" });

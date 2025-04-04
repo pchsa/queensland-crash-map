@@ -18,3 +18,13 @@ export async function fetchSuburbNames(): Promise<string[]> {
   const res = await axios.get<string[]>(`${API_BASE}/localities/names`);
   return res.data;
 }
+
+export async function fetchSuburbGeoData(name: string): Promise<any> {
+  const res = await axios.get<any>(`${API_BASE}/localities/geodata`, {
+    params: {
+      locality: name,
+    },
+  });
+
+  return res.data;
+}
