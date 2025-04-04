@@ -45,7 +45,7 @@ app.get("/crashes", async (req, res) => {
     const query = SQL`
       SELECT C.crash_ref_number, C.crash_severity, C.crash_year, C.crash_month, C.crash_day_of_week, C.crash_hour, C.crash_longitude, C.crash_latitude
       FROM crashes as C, localities as L
-      WHERE ST_Within(C.geom, L.geom) AND
+      WHERE 
     `;
 
     query.append(buildDateFilter(startDate, endDate));
@@ -54,14 +54,11 @@ app.get("/crashes", async (req, res) => {
       ? location.map((loc) => String(loc))
       : [String(location)];
 
-    const locationFilters = buildLocationFilter(locationList);
-
-    query.append(SQL` AND (`);
-    locationFilters.forEach((filter, i) => {
-      if (i > 0) query.append(SQL` OR `);
-      query.append(filter);
-    });
+    query.append(SQL`AND (`);
+    query.append(buildLocalitiesFilter(locationList));
     query.append(SQL`)`);
+
+    console.log(query);
     const result = await pg.query(query);
 
     res.json(result.rows);
@@ -109,18 +106,23 @@ function buildDateFilter(startDate: string, endDate: string): SQLStatement {
   `;
 }
 
-function buildLocationFilter(locations: string[]): SQLStatement[] {
-  const filters: SQLStatement[] = [];
+function buildLocalitiesFilter(locations: string[]): SQLStatement {
+  const query = SQL``;
+  locations = locations.filter((loc) => loc.startsWith("locality:"));
 
-  for (const loc of locations) {
-    const [type, value] = loc.split(":");
-
-    switch (type.toLowerCase()) {
-      case "locality":
-        filters.push(SQL`LOWER(L.locality) = ${value.toLowerCase()}`);
-        break;
-    }
+  if (locations.length == 0) {
+    return query;
   }
 
-  return filters;
+  query.append(SQL`(ST_Within(C.geom, L.geom) AND (`);
+  for (const [index, loc] of locations.entries()) {
+    const [type, value] = loc.split(":");
+    if (index > 0) query.append(SQL` OR `);
+    query.append(SQL`LOWER(L.locality) = ${value.toLowerCase()}`);
+  }
+  query.append(SQL`))`);
+
+  const filters: SQLStatement[] = [];
+
+  return query;
 }
