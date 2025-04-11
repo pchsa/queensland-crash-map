@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import "react-leaflet-markercluster/styles";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import "@mantine/charts/styles.css";
 import { createTheme, MantineProvider } from "@mantine/core";
 
 const theme = createTheme({
