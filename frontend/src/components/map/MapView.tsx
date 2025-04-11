@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
-import { useCrashStore } from "../store";
+import { useCrashStore } from "../../store";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import AreaSelect from "./AreaSelect";
 import "leaflet-area-select";

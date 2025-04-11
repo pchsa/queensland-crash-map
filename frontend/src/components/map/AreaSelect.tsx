@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
-import { useFilterStore } from "../store";
+import { useFilterStore } from "../../store";
 
 export default function AreaSelect() {
   const map = useMap() as L.Map & { selectArea: { enable: () => void } }; // Extend the Map type

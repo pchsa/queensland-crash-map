@@ -1,5 +1,5 @@
 import { Grid } from "@mantine/core";
-import MapView from "./components/MapView";
+import MapView from "./components/map/MapView";
 import Filters from "./components/filtering/Filters";
 
 function App() {

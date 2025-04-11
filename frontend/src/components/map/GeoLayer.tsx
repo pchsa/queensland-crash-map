@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
-import { useFilterStore } from "../store";
-import { fetchSuburbGeoData } from "../api";
+import { useFilterStore } from "../../store";
+import { fetchSuburbGeoData } from "../../api";
 import L from "leaflet";
 
 function GeoLayer() {

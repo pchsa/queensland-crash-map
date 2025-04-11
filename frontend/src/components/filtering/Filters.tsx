@@ -1,7 +1,6 @@
 import { Button } from "@mantine/core";
 import DateSelect from "./DateSelect";
 import { LocationSelect } from "./LocationSelect";
-import SeveritySelect from "./SeveritySelect";
 import { useCrashStore, useFilterStore } from "../../store";
 import { fetchCrashes } from "../../api";
 import { CrashQuery } from "../../types";
@@ -53,7 +52,6 @@ function Filters() {
     <div>
       <LocationSelect />
       <DateSelect />
-      <SeveritySelect />
       <Button onClick={handleSubmit}>Submit</Button>
     </div>
   );
