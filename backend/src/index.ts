@@ -2,8 +2,9 @@ import express from "express";
 import { Pool } from "pg";
 import dotenv from "dotenv";
 import cors from "cors";
-import SQL, { SQLStatement } from "sql-template-strings";
+import SQL from "sql-template-strings";
 import { buildCrashQuery } from "./QueryUtils";
+import { GoogleGenAI } from "@google/genai";
 
 dotenv.config(); // Load .env variables
 
@@ -19,6 +20,8 @@ const pg = new Pool({
   port: Number(process.env.DB_PORT),
   database: process.env.DB_NAME,
 });
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 app.get("/crashes", async (req, res) => {
   const { startDate, endDate, location } = req.query;
@@ -94,6 +97,19 @@ app.get("/localities/geodata", async (req, res) => {
       SQL`SELECT ST_AsGeoJSON(geom)::json as geom FROM localities WHERE locality = ${locality}`
     );
     res.json(result.rows[0].geom);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not retrieve geodata" });
+  }
+});
+
+app.get("/crashes/generate-chart", async (req, res) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash-lite",
+      contents: "How does AI work?",
+    });
+    res.json(response.text);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Could not retrieve geodata" });
