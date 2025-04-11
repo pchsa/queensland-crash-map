@@ -2,6 +2,7 @@ import { Stack, Text } from "@mantine/core";
 import { useCrashStore } from "../../store";
 import { DonutChart } from "@mantine/charts";
 import HourChart from "./HourChart";
+import AIBarChart from "./AIBarChart";
 
 function StatsPanel() {
   const { crashCount, getHourlyRadarData, getSeverityCounts } = useCrashStore();
@@ -19,6 +20,7 @@ function StatsPanel() {
           mx="auto"
         />
       </div>
+      <AIBarChart />
     </Stack>
   );
 }
