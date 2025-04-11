@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import dotenv from "dotenv";
 import cors from "cors";
 import SQL, { SQLStatement } from "sql-template-strings";
+import { buildCrashQuery } from "./QueryUtils";
 
 dotenv.config(); // Load .env variables
 
@@ -46,53 +47,23 @@ app.get("/crashes", async (req, res) => {
       ? location.map((loc) => String(loc))
       : [String(location)];
 
-    const localitiesFilter = buildLocalitiesFilter(locationList);
-    const bboxFilter = buildBboxFilter(locationList);
+    const columns = [
+      "crash_ref_number",
+      "crash_severity",
+      "crash_year",
+      "crash_month",
+      "crash_day_of_week",
+      "crash_hour",
+      "crash_longitude",
+      "crash_latitude",
+    ];
 
-    const dateFilter = buildDateFilter(startDate, endDate);
-
-    const queries: SQLStatement[] = [];
-
-    if (localitiesFilter.query.length > 0) {
-      const q = SQL`
-      SELECT C.crash_ref_number, C.crash_severity, C.crash_year,
-             C.crash_month, C.crash_day_of_week, C.crash_hour,
-             C.crash_longitude, C.crash_latitude
-      FROM crashes C
-      JOIN localities L ON ST_Within(C.geom, L.geom)
-      WHERE `;
-      q.append(dateFilter);
-      q.append(SQL`AND (`);
-      q.append(localitiesFilter);
-      q.append(SQL`)`);
-      queries.push(q);
-    }
-
-    if (bboxFilter.query.length > 0) {
-      const q = SQL`
-      SELECT C.crash_ref_number, C.crash_severity, C.crash_year,
-             C.crash_month, C.crash_day_of_week, C.crash_hour,
-             C.crash_longitude, C.crash_latitude
-      FROM crashes C
-      JOIN localities L ON ST_Within(C.geom, L.geom)
-      WHERE `;
-      q.append(dateFilter);
-      q.append(SQL`AND (`);
-      q.append(bboxFilter);
-      q.append(SQL`)`);
-      queries.push(q);
-    }
-
-    let finalQuery = SQL``;
-
-    if (queries.length === 2) {
-      finalQuery.append(queries[0]);
-      finalQuery.append(SQL` UNION `);
-      finalQuery.append(queries[1]);
-    } else {
-      console.log(queries[0]);
-      finalQuery = queries[0]; // only one was needed
-    }
+    const finalQuery = buildCrashQuery(
+      startDate,
+      endDate,
+      locationList,
+      columns
+    );
 
     const result = await pg.query(finalQuery);
 
@@ -132,57 +103,3 @@ app.get("/localities/geodata", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
-
-function buildDateFilter(startDate: string, endDate: string): SQLStatement {
-  return SQL`
-    DATE_TRUNC('month', TO_DATE(crash_month || ' ' || crash_year, 'Month YYYY'))
-    BETWEEN DATE_TRUNC('month', TO_DATE(${startDate}, 'YYYY-MM'))
-    AND DATE_TRUNC('month', TO_DATE(${endDate}, 'YYYY-MM'))
-  `;
-}
-
-function buildLocalitiesFilter(locations: string[]): SQLStatement {
-  const query = SQL``;
-  const localities = locations.filter((loc) => loc.startsWith("locality:"));
-
-  if (localities.length == 0) {
-    return query;
-  }
-
-  query.append(SQL`(ST_Within(C.geom, L.geom) AND (`);
-  for (const [index, loc] of localities.entries()) {
-    const value = loc.slice("locality:".length);
-    if (index > 0) query.append(SQL` OR `);
-    query.append(SQL`LOWER(L.locality) = ${value.toLowerCase()}`);
-  }
-  query.append(SQL`))`);
-
-  return query;
-}
-
-function buildBboxFilter(locations: string[]): SQLStatement {
-  const query = SQL``;
-  const bboxList = locations.filter((loc) => loc.startsWith("bbox:"));
-
-  if (bboxList.length == 0) {
-    return query;
-  }
-
-  query.append(SQL`(`);
-  for (const [index, loc] of bboxList.entries()) {
-    const value = loc.slice("bbox:".length);
-    const [minLng, minLat, maxLng, maxLat] = value.split(",").map(Number);
-
-    if (index > 0) query.append(SQL` OR `);
-
-    query.append(
-      SQL`ST_Within(
-        C.geom,
-        ST_Transform(ST_MakeEnvelope(${minLng}, ${minLat}, ${maxLng}, ${maxLat}, 4326), 7844)
-      )`
-    );
-  }
-  query.append(SQL`)`);
-
-  return query;
-}
