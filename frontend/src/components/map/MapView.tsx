@@ -33,10 +33,7 @@ function MapView() {
                 <div>
                   <strong>{crash.crash_severity}</strong>
                   <br />
-                  {crash.crash_day_of_week}, {crash.crash_month}{" "}
-                  {crash.crash_year}
-                  <br />
-                  {crash.crash_hour}:00
+                  {crash.crash_month} {crash.crash_year}
                 </div>
               </Popup>
             </Marker>

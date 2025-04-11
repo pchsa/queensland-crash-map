@@ -14,3 +14,14 @@ export type CrashQuery = {
   endDate: string; // format: 'YYYY-MM'
   location: string[]; // format: ['suburb:Brisbane', 'lga:Logan']
 };
+
+export type HourlyRadarData = {
+  hour: number; // 0 to 23 (acts as angle axis key)
+  value: number; // the metric you’re plotting (e.g. crash count)
+};
+
+export type SeverityDonutData = {
+  name: "Fatal" | "Hospitalisation" | "Medical treatment" | "Minor injury";
+  value: number;
+  color: string;
+};

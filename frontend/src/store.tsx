@@ -1,10 +1,12 @@
 import { create } from "zustand";
-import { Crash } from "./types";
+import { Crash, HourlyRadarData, SeverityDonutData } from "./types";
 
 type CrashState = {
   crashes: Crash[];
   setCrashes: (data: Crash[]) => void;
   crashCount: () => number;
+  getHourlyRadarData: () => HourlyRadarData[];
+  getSeverityCounts: () => SeverityDonutData[];
 };
 
 export const useCrashStore = create<CrashState>((set, get) => ({
@@ -14,6 +16,32 @@ export const useCrashStore = create<CrashState>((set, get) => ({
       crashes: data,
     }),
   crashCount: () => get().crashes.length,
+  getHourlyRadarData: () => {
+    const hourlyCounts = new Array(24).fill(0);
+    get().crashes.forEach(({ crash_hour }) => {
+      if (crash_hour >= 0 && crash_hour <= 23) {
+        hourlyCounts[crash_hour]++;
+      }
+    });
+    return hourlyCounts.map((value, hour) => ({ hour, value }));
+  },
+  getSeverityCounts: () => {
+    const counts: Record<string, number> = {};
+
+    get().crashes.forEach(({ crash_severity }) => {
+      counts[crash_severity] = (counts[crash_severity] || 0) + 1;
+    });
+
+    return Object.entries(counts).map(([name, value]) => ({
+      name: name as
+        | "Fatal"
+        | "Hospitalisation"
+        | "Medical treatment"
+        | "Minor injury",
+      value,
+      color: severityColorMap[name] ?? "gray.6",
+    }));
+  },
 }));
 
 type FilterState = {
@@ -44,3 +72,10 @@ export const useFilterStore = create<FilterState>((set) => ({
       bboxCounter: state.bboxCounter + 1,
     })),
 }));
+
+const severityColorMap: Record<string, string> = {
+  Fatal: "red.6",
+  Hospitalisation: "orange.6",
+  "Medical treatment": "yellow.6",
+  "Minor injury": "blue.6",
+};
