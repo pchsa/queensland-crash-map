@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import dotenv from "dotenv";
 import cors from "cors";
 import SQL from "sql-template-strings";
-import { buildCrashQuery } from "./QueryUtils";
+import { buildCrashQuery, sqlGenerationSystemInstruction } from "./QueryUtils";
 import { GoogleGenAI } from "@google/genai";
 
 dotenv.config(); // Load .env variables
@@ -22,6 +22,7 @@ const pg = new Pool({
 });
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const MODEL_NAME = "gemini-2.0-flash-lite";
 
 app.get("/crashes", async (req, res) => {
   const { startDate, endDate, location } = req.query;
@@ -104,17 +105,62 @@ app.get("/localities/geodata", async (req, res) => {
 });
 
 app.get("/crashes/generate-chart", async (req, res) => {
+  // const { startDate, endDate, location, prompt } = req.query;
+  // // Validate dates
+  // if (
+  //   !startDate ||
+  //   !endDate ||
+  //   typeof startDate !== "string" ||
+  //   typeof endDate !== "string"
+  // ) {
+  //   res
+  //     .status(400)
+  //     .json({ error: "startDate and endDate required in YYYY-MM format" });
+  //   return;
+  // }
+  // // Validate location
+  // if (!location) {
+  //   res.status(400).json({ error: "location is required" });
+  //   return;
+  // }
+  // // Validate query
+  // if (!prompt || typeof prompt !== "string") {
+  //   res.status(400).json({ error: "query is required" });
+  //   return;
+  // }
+  // try {
+  //   const locationList: string[] = Array.isArray(location)
+  //     ? location.map((loc) => String(loc))
+  //     : [String(location)];
+  //   const baseQuery = SQL`WITH filtered_crashes AS (`;
+  //   baseQuery.append(buildCrashQuery(startDate, endDate, locationList, ["*"]));
+  //   baseQuery.append(SQL`) `);
+  //   generateAggregationSql(prompt);
+  // } catch (err) {
+  //   console.error(err);
+  //   res.status(500).json({ error: "Could not retrieve geodata" });
+  // }
+
+  generateAggregationSql("Crashes involving red cars");
+});
+
+async function generateAggregationSql(prompt: string) {
+  console.log("LLM Step 1: Generating Aggregation SQL...");
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
-      contents: "How does AI work?",
+      model: "gemini-2.0-flash",
+      contents: prompt,
+      config: {
+        systemInstruction: sqlGenerationSystemInstruction,
+      },
     });
-    res.json(response.text);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Could not retrieve geodata" });
+    console.log(response.text);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
   }
-});
+}
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);

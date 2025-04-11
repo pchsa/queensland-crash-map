@@ -108,3 +108,33 @@ export function buildCrashQuery(
   }
   return finalQuery;
 }
+
+// --- Define Unique Values for Categorical Columns ---
+export const uniqueValuesInfo = `
+Unique values for relevant columns:
+- Crash_Atmospheric_Condition: ['Clear', 'Fog', 'Raining', 'Smoke/Dust']
+- crash_day_of_week: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+- crash_hour: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] (Note: These are integers)
+- crash_month: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] (Note: These seem to be strings, ensure DB column type matches. If it's integer 1-12, adjust prompt)
+- Crash_Nature: ['Angle', 'Collision - miscellaneous', 'Fall from vehicle', 'Head-on', 'Hit animal', 'Hit object', 'Hit parked vehicle', 'Hit pedestrian', 'Non-collision - miscellaneous', 'Other', 'Overturned', 'Rear-end', 'Sideswipe', 'Struck by external load', 'Struck by internal load']
+- Crash_Roadway_Feature: ['Bikeway', 'Bridge/Causeway', 'Forestry/National Park Road', 'Intersection - 5+ way', 'Intersection - Cross', 'Intersection - Interchange', 'Intersection - Multiple Road', 'Intersection - Roundabout', 'Intersection - T-Junction', 'Intersection - Y-Junction', 'Median Opening', 'Merge Lane', 'No Roadway Feature', 'Other', 'Railway Crossing']
+- Crash_Severity: ['Fatal', 'Hospitalisation', 'Medical treatment', 'Minor injury']
+- Crash_Speed_Limit: ['0 - 50 km/h', '60 km/h', '70 km/h', '80 - 90 km/h', '100 - 110 km/h', NULL] 
+- Crash_Type: ['Hit pedestrian', 'Multi-Vehicle', 'Other', 'Single Vehicle']
+- Crash_year: ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'] 
+`;
+
+// --- System Instruction for LLM (SQL Generation) ---
+export const sqlGenerationSystemInstruction = `
+You are an expert PostgreSQL assistant generating parts of SQL queries for a crash dataset.
+The data will be provided in a CTE named 'filtered_crashes'.
+Relevant columns within 'filtered_crashes': crash_severity (text), crash_year (text), crash_month (text), crash_day_of_week (text), crash_hour (integer), crash_date (timestamp without time zone - NOTE: only year and month are accurate), crash_nature (text), crash_type (text), crash_roadway_feature (text), crash_speed_limit (text), crash_atmospheric_condition (text).
+${uniqueValuesInfo} // Keep the unique values info
+Your task is to generate ONLY the 'SELECT ... FROM filtered_crashes GROUP BY ... ORDER BY ... LIMIT ...' part of the query based on the user's query.
+- Base the aggregation (usually COUNT(*)) and GROUP BY clause on the user's query, considering the valid unique values provided.
+- If the user query implies a breakdown by a secondary category (e.g., '... by severity'), use COUNT(*) FILTER (WHERE condition) syntax. Only create FILTER clauses for valid unique values of the secondary category.
+- The first column selected MUST be the category for the chart's main axis.
+- Do NOT include 'WITH filtered_crashes AS (...)'. Start directly with 'SELECT'.
+- Order results meaningfully. Apply a reasonable LIMIT.
+- Output ONLY the raw SQL fragment, no explanations or markdown.
+`;
