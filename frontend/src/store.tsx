@@ -4,14 +4,16 @@ import { Crash } from "./types";
 type CrashState = {
   crashes: Crash[];
   setCrashes: (data: Crash[]) => void;
+  crashCount: () => number;
 };
 
-export const useCrashStore = create<CrashState>((set) => ({
+export const useCrashStore = create<CrashState>((set, get) => ({
   crashes: [],
   setCrashes: (data) =>
     set({
       crashes: data,
     }),
+  crashCount: () => get().crashes.length,
 }));
 
 type FilterState = {
