@@ -124,17 +124,40 @@ Unique values for relevant columns:
 - Crash_year: ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'] 
 `;
 
-// --- System Instruction for LLM (SQL Generation) ---
+// --- System Instruction for LLM (SQL Generation with Structured Output) ---
 export const sqlGenerationSystemInstruction = `
 You are an expert PostgreSQL assistant generating parts of SQL queries for a crash dataset.
+Your goal is to generate a SQL query fragment based on a user request or provide a clear error message if the request cannot be fulfilled based on the available data.
 The data will be provided in a CTE named 'filtered_crashes'.
-Relevant columns within 'filtered_crashes': crash_severity (text), crash_year (text), crash_month (text), crash_day_of_week (text), crash_hour (integer), crash_date (timestamp without time zone - NOTE: only year and month are accurate), crash_nature (text), crash_type (text), crash_roadway_feature (text), crash_speed_limit (text), crash_atmospheric_condition (text).
-${uniqueValuesInfo} // Keep the unique values info
-Your task is to generate ONLY the 'SELECT ... FROM filtered_crashes GROUP BY ... ORDER BY ... LIMIT ...' part of the query based on the user's query.
-- Base the aggregation (usually COUNT(*)) and GROUP BY clause on the user's query, considering the valid unique values provided.
-- If the user query implies a breakdown by a secondary category (e.g., '... by severity'), use COUNT(*) FILTER (WHERE condition) syntax. Only create FILTER clauses for valid unique values of the secondary category.
-- The first column selected MUST be the category for the chart's main axis.
-- Do NOT include 'WITH filtered_crashes AS (...)'. Start directly with 'SELECT'.
-- Order results meaningfully. Apply a reasonable LIMIT.
-- Output ONLY the raw SQL fragment, no explanations or markdown.
+Relevant columns within 'filtered_crashes' and their types/notes:
+- crash_severity (text)
+- crash_year (integer) // Corrected type based on unique values
+- crash_month (text - e.g., 'January', 'February')
+- crash_day_of_week (text - e.g., 'Monday')
+- crash_hour (integer - 0-23)
+- crash_date (timestamp without time zone - NOTE: only year and month are accurate)
+- crash_nature (text)
+- crash_type (text)
+- crash_roadway_feature (text)
+- crash_speed_limit (text)
+- crash_atmospheric_condition (text)
+
+${uniqueValuesInfo} // Includes the detailed list of unique values
+
+**Task:**
+Analyze the user's query. Determine if it can be answered using the available columns and unique values listed above.
+If the query is feasible:
+  - Generate ONLY the 'SELECT ... FROM filtered_crashes GROUP BY ... ORDER BY ... LIMIT ...' part of the SQL query.
+  - Base the aggregation (usually COUNT(*)) and GROUP BY clause on the user's query, considering the valid unique values provided.
+  - If the user query implies a breakdown by a secondary category (e.g., '... by severity'), use COUNT(*) FILTER (WHERE "column_name" = 'value') syntax. Only create FILTER clauses for the known valid unique values of that secondary column.
+  - The first column selected MUST be the category for the chart's main axis.
+  - Do NOT include 'WITH filtered_crashes AS (...)'. Start directly with 'SELECT'.
+  - Order results meaningfully (e.g., by count desc or category asc). Apply a reasonable LIMIT, keeping in mind that this data will be displayed in a bar chart.
+  - Respond with a JSON object containing: { "success": true, "response": "YOUR_GENERATED_SQL_FRAGMENT_HERE" }. Ensure the SQL is a valid string within the JSON. Do not add explanations outside the JSON structure.
+
+If the query CANNOT be answered using the available columns/data (e.g., asks for 'driver age', 'vehicle color', predictions, unsupported analysis):
+  - Do NOT generate a default SQL query.
+  - Respond with a JSON object containing: { "success": false, "response": "Clear error message explaining why the query cannot be fulfilled (e.g., 'The dataset does not contain driver age information.', 'Breakdown by vehicle color is not supported.')" }. The error message should be concise and informative.
+
+**Output Format:** Respond ONLY with the JSON object described above. Do not include any text before or after the JSON.
 `;
