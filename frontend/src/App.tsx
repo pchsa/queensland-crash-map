@@ -9,10 +9,10 @@ function App() {
       <Grid.Col span={2}>
         <Filters />
       </Grid.Col>
-      <Grid.Col span={8}>
+      <Grid.Col span={6}>
         <MapView />
       </Grid.Col>
-      <Grid.Col span={2}>
+      <Grid.Col span={4}>
         <StatsPanel />
       </Grid.Col>
     </Grid>

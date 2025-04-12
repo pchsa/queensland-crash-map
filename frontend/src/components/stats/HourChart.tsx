@@ -19,7 +19,7 @@ function HourChart({ data }: HourChartProps) {
       <Text fz="xs" mb="sm" ta="center">
         Data only for hovered segment
       </Text>
-      <AspectRatio ratio={1} w="100%">
+      <AspectRatio ratio={16 / 9} w="100%">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data} outerRadius="70%">
             <PolarGrid gridType="circle" />
