@@ -15,6 +15,7 @@ import {
   validateChartQueryParams,
   validateCrashQueryParams,
 } from "./ValidateUtils";
+import { generateChartData } from "./AIChartDataGeneration";
 
 dotenv.config(); // Load .env variables
 
@@ -129,10 +130,14 @@ app.get("/crashes/generate-chart", async (req, res) => {
     q.append(generateSQLResponse.response);
     const result = await pg.query(q);
 
-    res.json(result.rows);
+    console.log(result.rows);
+    // Get Chart Data from LLM
+    const chartData = await generateChartData(prompt, result.rows, ai);
+
+    res.json(chartData);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Could not retrieve geodata" });
+    res.status(500).json({ error: "Could not retrieve chart data" });
   }
 });
 
