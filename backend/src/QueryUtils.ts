@@ -124,6 +124,11 @@ Unique values for relevant columns:
 - Crash_year: ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'] 
 `;
 
+export type LLMSQLResponse = {
+  success: boolean;
+  response: string;
+};
+
 // --- System Instruction for LLM (SQL Generation with Structured Output) ---
 export const sqlGenerationSystemInstruction = `
 You are an expert PostgreSQL assistant generating parts of SQL queries for a crash dataset.
