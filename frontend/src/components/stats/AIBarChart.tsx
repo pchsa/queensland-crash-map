@@ -1,15 +1,30 @@
 import { BarChart } from "@mantine/charts";
-import { ActionIcon, Group, Stack, TextInput } from "@mantine/core";
+import { ActionIcon, Group, Stack, TextInput, Text } from "@mantine/core";
 import { IconSparkles, IconInfoCircle } from "@tabler/icons-react";
-import { CrashQuery } from "../../types";
+import { AIChartData, CrashQuery } from "../../types";
 import { useState } from "react";
+import { fetchAIChartData } from "../../api";
+import { useFilterStore } from "../../store";
 
 function AIBarChart() {
+  const { location, dateRange } = useFilterStore();
+
   const [prompt, setPrompt] = useState("");
+  const [chartData, setChartData] = useState<AIChartData>({
+    title: "Sample Data",
+    dataKey: "crash_atmospheric_condition",
+    series: [{ name: "count" }],
+    data: data,
+  });
 
   const handleGenerateChart = () => {
     console.log("Generating chart with prompt:", prompt);
-    // your logic here
+    fetchAIChartData(getCrashQuery(location, dateRange), prompt).then(
+      (value) => {
+        console.log(value);
+        setChartData(value);
+      }
+    );
   };
 
   return (
@@ -22,6 +37,7 @@ function AIBarChart() {
           onChange={(event) => setPrompt(event.currentTarget.value)}
         />
         <ActionIcon
+          disabled={prompt.length == 0}
           size="input-sm"
           variant="filled"
           onClick={handleGenerateChart}
@@ -35,28 +51,24 @@ function AIBarChart() {
           />
         </ActionIcon>
       </Group>
-      <BarChart
-        h={300}
-        data={data}
-        dataKey="month"
-        series={[
-          { name: "Smartphones" },
-          { name: "Laptops" },
-          { name: "Tablets" },
-        ]}
-        tickLine="y"
-      />
+      <div>
+        <Text fz="xs" mb="sm" ta="center">
+          {chartData.title}
+        </Text>
+        <BarChart
+          h={300}
+          data={chartData.data}
+          dataKey={chartData.dataKey}
+          series={chartData.series}
+        />
+      </div>
     </Stack>
   );
 }
 export default AIBarChart;
-export const data = [
-  { month: "January", Smartphones: 1200, Laptops: 900, Tablets: 200 },
-  { month: "February", Smartphones: 1900, Laptops: 1200, Tablets: 400 },
-  { month: "March", Smartphones: 400, Laptops: 1000, Tablets: 200 },
-  { month: "April", Smartphones: 1000, Laptops: 200, Tablets: 800 },
-  { month: "May", Smartphones: 800, Laptops: 1400, Tablets: 1200 },
-  { month: "June", Smartphones: 750, Laptops: 600, Tablets: 1000 },
+const data = [
+  { crash_atmospheric_condition: "Clear", count: 1 },
+  { crash_atmospheric_condition: "Raining", count: 6 },
 ];
 
 function getCrashQuery(

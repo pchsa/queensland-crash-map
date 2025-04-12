@@ -8,7 +8,7 @@ function StatsPanel() {
   const { crashCount, getHourlyRadarData, getSeverityCounts } = useCrashStore();
   return (
     <Stack>
-      <text>{crashCount()} crashes</text>
+      <Text>{crashCount()} crashes</Text>
       <HourChart data={getHourlyRadarData()} />
       <div>
         <Text fz="xs" mb="sm" ta="center">
