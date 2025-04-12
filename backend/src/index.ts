@@ -5,10 +5,16 @@ import cors from "cors";
 import SQL from "sql-template-strings";
 import {
   buildCrashQuery,
-  LLMSQLResponse,
-  sqlGenerationSystemInstruction,
+  buildFilteredCrashCTEQuery,
+  CRASH_QUERY_COLUMNS,
+  getLocationList,
 } from "./QueryUtils";
 import { GoogleGenAI, Type } from "@google/genai";
+import { generateAggregationSql } from "./AISQLGeneration";
+import {
+  validateChartQueryParams,
+  validateCrashQueryParams,
+} from "./ValidateUtils";
 
 dotenv.config(); // Load .env variables
 
@@ -29,42 +35,21 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL_NAME = "gemini-2.0-flash-lite";
 
 app.get("/crashes", async (req, res) => {
-  const { startDate, endDate, location } = req.query;
-
-  // Validate dates
-  if (
-    !startDate ||
-    !endDate ||
-    typeof startDate !== "string" ||
-    typeof endDate !== "string"
-  ) {
+  const validation = validateCrashQueryParams(
+    req.query.startDate,
+    req.query.endDate,
+    req.query.location,
     res
-      .status(400)
-      .json({ error: "startDate and endDate required in YYYY-MM format" });
-    return;
-  }
+  );
 
-  // Validate location
-  if (!location) {
-    res.status(400).json({ error: "location is required" });
-    return;
-  }
+  if (!validation.isValid) return;
+  const { startDate, endDate, location } = validation;
 
   try {
-    const locationList: string[] = Array.isArray(location)
-      ? location.map((loc) => String(loc))
-      : [String(location)];
-
-    const columns = [
-      "crash_ref_number",
-      "crash_severity",
-      "crash_year",
-      "crash_month",
-      "crash_day_of_week",
-      "crash_hour",
-      "crash_longitude",
-      "crash_latitude",
-    ];
+    const locationList: string[] = getLocationList(
+      location as string | string[] | undefined
+    );
+    const columns = CRASH_QUERY_COLUMNS;
 
     const finalQuery = buildCrashQuery(
       startDate,
@@ -109,87 +94,47 @@ app.get("/localities/geodata", async (req, res) => {
 });
 
 app.get("/crashes/generate-chart", async (req, res) => {
-  const { startDate, endDate, location, prompt } = req.query;
-  // // Validate dates
-  // if (
-  //   !startDate ||
-  //   !endDate ||
-  //   typeof startDate !== "string" ||
-  //   typeof endDate !== "string"
-  // ) {
-  //   res
-  //     .status(400)
-  //     .json({ error: "startDate and endDate required in YYYY-MM format" });
-  //   return;
-  // }
-  // // Validate location
-  // if (!location) {
-  //   res.status(400).json({ error: "location is required" });
-  //   return;
-  // }
-  // Validate query
-  if (!prompt || typeof prompt !== "string") {
-    res.status(400).json({ error: "query is required" });
-    return;
-  }
+  const validation = validateChartQueryParams(
+    req.query.startDate,
+    req.query.endDate,
+    req.query.location,
+    req.query.prompt,
+    res
+  );
 
+  if (!validation.isValid) return;
+
+  const { startDate, endDate, location, prompt } = validation;
   try {
-    // const locationList: string[] = Array.isArray(location)
-    //   ? location.map((loc) => String(loc))
-    //   : [String(location)];
-    // const baseQuery = SQL`WITH filtered_crashes AS (`;
-    // baseQuery.append(buildCrashQuery(startDate, endDate, locationList, ["*"]));
-    // baseQuery.append(SQL`) `);
+    const locationList: string[] = getLocationList(
+      location as string | string[] | undefined
+    );
+
+    const q = buildFilteredCrashCTEQuery(
+      buildCrashQuery(startDate, endDate, locationList, ["*"])
+    );
+
     console.log("LLM Step 1: Generating Aggregation SQL...");
 
-    const response = await generateAggregationSql(prompt);
+    // Get SQL query from LLM
+    const generateSQLResponse = await generateAggregationSql(prompt, ai);
+    console.log(generateSQLResponse.response);
+    console.log(generateSQLResponse.success);
 
-    // console.log(response.response);
-    // console.log(response.success);
-    res.json(response);
+    if (!generateSQLResponse.success) {
+      res.status(400).json({ error: generateSQLResponse.response });
+    }
+
+    // Query database
+    q.append(generateSQLResponse.response);
+    const result = await pg.query(q);
+
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Could not retrieve geodata" });
   }
 });
-
-async function generateAggregationSql(prompt: string): Promise<LLMSQLResponse> {
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
-      contents: prompt,
-      config: {
-        systemInstruction: sqlGenerationSystemInstruction,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            response: {
-              type: Type.STRING,
-              description: "SQL Query or error message",
-              nullable: false,
-            },
-            success: {
-              type: Type.BOOLEAN,
-              description:
-                "true if successfully returns SQL query, false otherwise",
-              nullable: false,
-            },
-          },
-          required: ["response", "success"],
-        },
-      },
-    });
-
-    if (!response.text) {
-      throw new Error("Response text is undefined");
-    }
-
-    return JSON.parse(response.text) as LLMSQLResponse;
-  } catch (error) {
-    throw error instanceof Error ? error : new Error("Unknown error");
-  }
-}
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
