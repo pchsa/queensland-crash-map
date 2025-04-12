@@ -1,5 +1,5 @@
 import express from "express";
-import { Pool } from "pg";
+import pgLibrary, { Pool } from "pg";
 import dotenv from "dotenv";
 import cors from "cors";
 import SQL from "sql-template-strings";
@@ -18,6 +18,18 @@ import {
 import { generateChartData } from "./AIChartDataGeneration";
 
 dotenv.config(); // Load .env variables
+
+// --- Configure pg Type Parser for BIGINT ---
+const BIGINT_OID = 20;
+// Use the imported library object (pgLibrary) to access static types
+pgLibrary.types.setTypeParser(BIGINT_OID, (val: string) => {
+  // Add basic check for null or empty string if necessary
+  if (val === null || val === undefined || val === "") {
+    return null; // Or 0, depending on how you want to handle null counts
+  }
+  return parseInt(val, 10);
+});
+// --- End Type Parser Configuration ---
 
 const app = express();
 app.use(cors());
