@@ -124,6 +124,7 @@ app.get("/crashes/generate-chart", async (req, res) => {
 
     if (!generateSQLResponse.success) {
       res.status(400).json({ error: generateSQLResponse.response });
+      return;
     }
 
     // Query database

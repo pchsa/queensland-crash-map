@@ -22,7 +22,7 @@ Your goal is to generate a SQL query fragment based on a user request or provide
 The data will be provided in a CTE named 'filtered_crashes'.
 Relevant columns within 'filtered_crashes' and their types/notes:
 - crash_severity (text)
-- crash_year (integer) // Corrected type based on unique values
+- crash_year (text) 
 - crash_month (text - e.g., 'January', 'February')
 - crash_day_of_week (text - e.g., 'Monday')
 - crash_hour (integer - 0-23)
@@ -37,18 +37,23 @@ ${uniqueValuesInfo} // Includes the detailed list of unique values
 
 **Task:**
 Analyze the user's query. Determine if it can be answered using the available columns and unique values listed above.
+
+If the query cannot be processed, respond with success: false and a specific error message. Reasons for failure include:
+  - Input is irrelevant nonsense (use generic error: "Please ask about crash data...").
+  - Query includes location/date filtering (direct user to map filters: "Use map filters for location/date...").
+  - Query requires columns not available (specify missing column: "Dataset lacks [Column Name]...") or analysis types not supported (specify reason: "Analysis type [Reason] not supported...").
+
+
 If the query is feasible:
   - Generate ONLY the 'SELECT ... FROM filtered_crashes GROUP BY ... ORDER BY ... LIMIT ...' part of the SQL query.
-  - Base the aggregation (usually COUNT(*)) and GROUP BY clause on the user's query, considering the valid unique values provided.
-  - If the user query implies a breakdown by a secondary category (e.g., '... by severity'), use COUNT(*) FILTER (WHERE "column_name" = 'value') syntax. Only create FILTER clauses for the known valid unique values of that secondary column.
+  - Base the aggregation and GROUP BY clause on the user's query, considering the valid unique values provided.
+  - **IMPORTANT:** The primary aggregation should usually be COUNT(*). Always cast the result of COUNT(*) to an integer using the ::INTEGER syntax. For example: COUNT(*)::INTEGER AS count. Use a simple alias like 'count' or the category name if using FILTER.  - If the user query implies a breakdown by a secondary category (e.g., '... by severity'), use COUNT(*) FILTER (WHERE "column_name" = 'value') syntax. Only create FILTER clauses for the known valid unique values of that secondary column.
   - The first column selected MUST be the category for the chart's main axis.
   - Do NOT include 'WITH filtered_crashes AS (...)'. Start directly with 'SELECT'.
   - Order results meaningfully (e.g., by count desc or category asc). Apply a reasonable LIMIT, keeping in mind that this data will be displayed in a bar chart.
   - Respond with a JSON object containing: { "success": true, "response": "YOUR_GENERATED_SQL_FRAGMENT_HERE" }. Ensure the SQL is a valid string within the JSON. Do not add explanations outside the JSON structure.
 
-If the query CANNOT be answered using the available columns/data (e.g., asks for 'driver age', 'vehicle color', predictions, unsupported analysis):
-  - Do NOT generate a default SQL query.
-  - Respond with a JSON object containing: { "success": false, "response": "Clear error message explaining why the query cannot be fulfilled (e.g., 'The dataset does not contain driver age information.', 'Breakdown by vehicle color is not supported.')" }. The error message should be concise and informative.
+
 
 **Output Format:** Respond ONLY with the JSON object described above. Do not include any text before or after the JSON.
 `;
