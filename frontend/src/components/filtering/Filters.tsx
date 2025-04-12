@@ -10,7 +10,7 @@ function Filters() {
   const { setCrashes } = useCrashStore();
 
   const handleSubmit = () => {
-    // do something with selected filters here
+    // Validate params
     if (location.length == 0) {
       console.log("must include location");
       return;
@@ -21,31 +21,7 @@ function Filters() {
       return;
     }
 
-    const queryLocation = location.map((loc) =>
-      !loc.startsWith("Bounding Box #")
-        ? `locality:${loc}`
-        : `bbox:${loc.split(":")[1]}`
-    );
-
-    const queryDateRange = dateRange.map((date) => {
-      if (!date) return null;
-
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const yyyyMM = `${year}-${month}`;
-      return yyyyMM;
-    });
-
-    console.log({
-      startDate: queryDateRange[0],
-      endDate: queryDateRange[1],
-      location: queryLocation,
-    });
-    fetchCrashes({
-      startDate: queryDateRange[0],
-      endDate: queryDateRange[1],
-      location: queryLocation,
-    } as CrashQuery).then(setCrashes);
+    fetchCrashes(getCrashQuery(location, dateRange)).then(setCrashes);
   };
 
   return (
@@ -58,3 +34,29 @@ function Filters() {
 }
 
 export default Filters;
+
+function getCrashQuery(
+  location: string[],
+  dateRange: [Date | null, Date | null]
+): CrashQuery {
+  const queryLocation = location.map((loc) =>
+    !loc.startsWith("Bounding Box #")
+      ? `locality:${loc}`
+      : `bbox:${loc.split(":")[1]}`
+  );
+
+  const queryDateRange = dateRange.map((date) => {
+    if (!date) return null;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyyMM = `${year}-${month}`;
+    return yyyyMM;
+  });
+
+  return {
+    startDate: queryDateRange[0],
+    endDate: queryDateRange[1],
+    location: queryLocation,
+  } as CrashQuery;
+}

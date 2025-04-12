@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Crash, CrashQuery } from "./types";
+import { AIChartData, Crash, CrashQuery } from "./types";
 
 const API_BASE = "http://localhost:3000";
 
@@ -26,5 +26,23 @@ export async function fetchSuburbGeoData(name: string): Promise<any> {
     },
   });
 
+  return res.data;
+}
+
+export async function fetchAIChartData(
+  crashContext: CrashQuery,
+  prompt: string
+): Promise<AIChartData> {
+  const res = await axios.get<AIChartData>(
+    `${API_BASE}/crashes/generate-chart`,
+    {
+      params: {
+        startDate: crashContext.startDate,
+        endDate: crashContext.endDate,
+        location: crashContext.location,
+        prompt: prompt,
+      },
+    }
+  );
   return res.data;
 }

@@ -25,3 +25,10 @@ export type SeverityDonutData = {
   value: number;
   color: string;
 };
+
+export type AIChartData = {
+  title: string;
+  dataKey: string;
+  series: { name: string }[]; // Use the specific type
+  data: any[]; // Use any[] or Record<string, any>[] if preferred
+};
