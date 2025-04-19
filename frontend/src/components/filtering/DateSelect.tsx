@@ -3,7 +3,7 @@ import { useFilterStore } from "../../store";
 import { Title } from "@mantine/core";
 
 function DateSelect() {
-  const { dateRange, setDateRange, location } = useFilterStore();
+  const { dateRange, setDateRange } = useFilterStore();
   return (
     <MonthPickerInput
       type="range"
@@ -20,7 +20,6 @@ function DateSelect() {
       }}
       minDate={new Date(2011, 0, 1)} // January 1, 2011
       maxDate={new Date(2023, 11, 31)}
-      disabled={location.length == 0}
     />
   );
 }

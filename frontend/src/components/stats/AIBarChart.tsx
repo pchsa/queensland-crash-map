@@ -6,16 +6,23 @@ import {
   TextInput,
   Text,
   Center,
+  Loader,
+  Tooltip,
 } from "@mantine/core";
-import { IconSparkles, IconInfoCircle } from "@tabler/icons-react";
+import {
+  IconSparkles,
+  IconInfoCircle,
+  IconExclamationCircle,
+} from "@tabler/icons-react";
 import { AIChartData, CrashQuery } from "../../types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchAIChartData } from "../../api";
-import { useFilterStore } from "../../store";
+import { useCrashStore, useFilterStore } from "../../store";
 import axios from "axios";
 
 function AIBarChart() {
   const { location, dateRange } = useFilterStore();
+  const { crashes } = useCrashStore();
 
   const [prompt, setPrompt] = useState("");
   const [chartData, setChartData] = useState<AIChartData>({
@@ -26,6 +33,12 @@ function AIBarChart() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [displayChart, setDisplayChart] = useState(false);
+
+  useEffect(() => {
+    setError("");
+    setDisplayChart(false);
+  }, [crashes]);
 
   const handleGenerateChart = async () => {
     setLoading(true);
@@ -43,48 +56,87 @@ function AIBarChart() {
       }
     }
     setLoading(false);
+    setDisplayChart(true);
+  };
+
+  const renderChart = () => {
+    if (error) {
+      return (
+        <Center h={300}>
+          <Stack align="center" gap="xs">
+            <IconExclamationCircle size={32} color="gray" />
+            <Text c="dimmed" ta="center">
+              {error}
+            </Text>
+          </Stack>
+        </Center>
+      );
+    } else if (loading) {
+      return (
+        <Center h={300}>
+          <Stack align="center" gap="xs">
+            <Loader size={32} color="gray" />
+            <Text c="dimmed" ta="center">
+              Generating Chart
+            </Text>
+          </Stack>
+        </Center>
+      );
+    } else if (displayChart) {
+      return (
+        <div>
+          <Text fz="xs" mb="sm" ta="center">
+            {chartData.title}
+          </Text>
+          <BarChart
+            tooltipAnimationDuration={200}
+            h={300}
+            data={chartData.data}
+            dataKey={chartData.dataKey}
+            series={chartData.series}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <Center h={300}>
+          <Stack align="center" gap="xs">
+            <IconInfoCircle size={32} color="gray" />
+            <Text c="dimmed" ta="center">
+              Select data and submit a prompt to generate a chart.
+            </Text>
+          </Stack>
+        </Center>
+      );
+    }
+    return null;
   };
 
   return (
     <Stack>
       <Group>
         <TextInput
-          error={error}
-          placeholder="Generate bar chart about..."
+          placeholder="Generate a chart (e.g. Show me crashes by severity)"
           size="sm"
           value={prompt}
           onChange={(event) => setPrompt(event.currentTarget.value)}
           flex={1}
         />
+
         <ActionIcon
-          disabled={prompt.length == 0 || loading}
+          disabled={prompt.length == 0 || location.length == 0}
           size="input-sm"
           variant="filled"
-          onClick={handleGenerateChart}
+          onClick={(event) => {
+            event.preventDefault();
+            handleGenerateChart();
+          }}
         >
           <IconSparkles style={{ width: "70%", height: "70%" }} stroke={1.5} />
         </ActionIcon>
       </Group>
-      <div>
-        <Text fz="xs" mb="sm" ta="center">
-          {chartData.title}
-        </Text>
-        <BarChart
-          h={300}
-          data={chartData.data}
-          dataKey={chartData.dataKey}
-          series={chartData.series}
-        />
-      </div>
 
-      <Center h={200}>
-        <Stack align="center" gap="xs">
-          <IconInfoCircle size={32} color="gray" />
-          <Text c="dimmed" ta="center">
-            Select data and submit a prompt to generate a chart.
-          </Text>
-        </Stack>
-      </Center>
+      {renderChart()}
     </Stack>
   );
 }
