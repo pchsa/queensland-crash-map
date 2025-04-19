@@ -1,4 +1,12 @@
-import { Center, Paper, ScrollArea, Stack, Text, Title } from "@mantine/core";
+import {
+  Center,
+  Paper,
+  ScrollArea,
+  Space,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { useCrashStore, useFilterStore } from "../../store";
 import { DonutChart } from "@mantine/charts";
 import HourChart from "./HourChart";
@@ -12,7 +20,6 @@ function StatsPanel() {
   const { dateRange } = useFilterStore();
 
   useEffect(() => {
-    // Check if dateRange exists, has 2 elements, and both are valid Date objects
     if (
       dateRange &&
       dateRange.length === 2 &&
@@ -21,25 +28,18 @@ function StatsPanel() {
       dateRange[1] instanceof Date &&
       !isNaN(dateRange[1].getTime())
     ) {
-      // If valid, format and update the state
       const formattedRange = formatDisplayDateRange(dateRange[0], dateRange[1]);
       setDateDisplay(formattedRange);
     }
-    // If dateRange is null, undefined, or invalid, do nothing (as requested)
-    // The state 'dateDisplay' will retain its previous value.
-    // If you wanted it to reset, you could add an else block here:
-    // else {
-    //   setDateDisplay("Date range not selected"); // Or ""
-    // }
   }, [dateRange]);
 
   return (
     <Paper shadow="md" radius="lg" w="100%" p={25} withBorder>
       <Stack w="100%" align="center" gap={0}>
         <Title order={1}>{crashCount()} crashes</Title>
-        {/* Use the helper function to display the formatted date range */}
         <Text c="dimmed">{dateDisplay}</Text>
       </Stack>
+      <Space h="lg" />
       <AIBarChart />
     </Paper>
   );

@@ -1,5 +1,12 @@
 import { BarChart } from "@mantine/charts";
-import { ActionIcon, Group, Stack, TextInput, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Group,
+  Stack,
+  TextInput,
+  Text,
+  Center,
+} from "@mantine/core";
 import { IconSparkles, IconInfoCircle } from "@tabler/icons-react";
 import { AIChartData, CrashQuery } from "../../types";
 import { useState } from "react";
@@ -47,6 +54,7 @@ function AIBarChart() {
           size="sm"
           value={prompt}
           onChange={(event) => setPrompt(event.currentTarget.value)}
+          flex={1}
         />
         <ActionIcon
           disabled={prompt.length == 0 || loading}
@@ -55,12 +63,6 @@ function AIBarChart() {
           onClick={handleGenerateChart}
         >
           <IconSparkles style={{ width: "70%", height: "70%" }} stroke={1.5} />
-        </ActionIcon>
-        <ActionIcon size="input-sm" variant="filled">
-          <IconInfoCircle
-            style={{ width: "70%", height: "70%" }}
-            stroke={1.5}
-          />
         </ActionIcon>
       </Group>
       <div>
@@ -74,6 +76,15 @@ function AIBarChart() {
           series={chartData.series}
         />
       </div>
+
+      <Center h={200}>
+        <Stack align="center" gap="xs">
+          <IconInfoCircle size={32} color="gray" />
+          <Text c="dimmed" ta="center">
+            Select data and submit a prompt to generate a chart.
+          </Text>
+        </Stack>
+      </Center>
     </Stack>
   );
 }
