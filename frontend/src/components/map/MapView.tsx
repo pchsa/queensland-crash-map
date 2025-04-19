@@ -1,4 +1,10 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  ZoomControl,
+} from "react-leaflet";
 import { LatLngExpression } from "leaflet";
 import { useCrashStore } from "../../store";
 import MarkerClusterGroup from "react-leaflet-markercluster";
@@ -13,7 +19,13 @@ function MapView() {
     <MapContainer
       center={[-27.4698, 153.0251]}
       zoom={12}
-      style={{ height: "100vh", width: "100%" }}
+      zoomControl={false}
+      style={{
+        height: "100vh",
+        width: "100%",
+        position: "absolute",
+        zIndex: 1,
+      }}
     >
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -40,6 +52,8 @@ function MapView() {
           );
         })}
       </MarkerClusterGroup>
+
+      <ZoomControl position="bottomleft" />
     </MapContainer>
   );
 }

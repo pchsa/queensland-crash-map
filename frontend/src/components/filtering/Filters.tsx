@@ -1,4 +1,4 @@
-import { Button } from "@mantine/core";
+import { Button, Paper, Title } from "@mantine/core";
 import DateSelect from "./DateSelect";
 import { LocationSelect } from "./LocationSelect";
 import { useCrashStore, useFilterStore } from "../../store";
@@ -25,11 +25,24 @@ function Filters() {
   };
 
   return (
-    <div>
+    <Paper
+      pos="absolute"
+      top={20}
+      left={20}
+      p={20}
+      style={{
+        zIndex: 10,
+      }}
+      shadow="md"
+      radius="lg"
+      w={400}
+      withBorder
+    >
+      <Title order={2}>Filters</Title>
       <LocationSelect />
       <DateSelect />
       <Button onClick={handleSubmit}>Submit</Button>
-    </div>
+    </Paper>
   );
 }
 

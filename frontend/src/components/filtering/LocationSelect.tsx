@@ -119,7 +119,7 @@ export function LocationSelect() {
                 onFocus={() => combobox.openDropdown()}
                 onBlur={() => combobox.closeDropdown()}
                 value={search}
-                placeholder="Search for a suburb"
+                placeholder={location.length == 0 ? "Search for a suburb" : ""}
                 onChange={(event) => {
                   combobox.openDropdown();
                   setSearch(event.currentTarget.value);
