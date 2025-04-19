@@ -44,22 +44,6 @@ function GeoLayer() {
               dashArray: "4 8",
               fillOpacity: 0.2,
             }).addTo(map);
-            // export interface PathOptions extends InteractiveLayerOptions {
-            //     stroke?: boolean | undefined;
-            //     color?: string | undefined;
-            //     weight?: number | undefined;
-            //     opacity?: number | undefined;
-            //     lineCap?: LineCapShape | undefined;
-            //     lineJoin?: LineJoinShape | undefined;
-            //     dashArray?: string | number[] | undefined;
-            //     dashOffset?: string | undefined;
-            //     fill?: boolean | undefined;
-            //     fillColor?: string | undefined;
-            //     fillOpacity?: number | undefined;
-            //     fillRule?: FillRule | undefined;
-            //     renderer?: Renderer | undefined;
-            //     className?: string | undefined;
-            // }
             layerMap[loc] = rectangle;
           } else {
             const geojson = await fetchSuburbGeoData(loc);
