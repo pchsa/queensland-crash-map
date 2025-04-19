@@ -1,13 +1,15 @@
 import { MonthPickerInput } from "@mantine/dates";
 import { useFilterStore } from "../../store";
+import { Title } from "@mantine/core";
 
 function DateSelect() {
-  const { dateRange, setDateRange } = useFilterStore();
+  const { dateRange, setDateRange, location } = useFilterStore();
   return (
     <MonthPickerInput
       type="range"
-      label="Pick dates range"
+      label={<Title order={5}>Date Range</Title>}
       placeholder="Pick dates range"
+      allowSingleDateInRange
       value={dateRange}
       onChange={(val) => {
         if (!val[0] && !val[1]) {
@@ -18,6 +20,7 @@ function DateSelect() {
       }}
       minDate={new Date(2011, 0, 1)} // January 1, 2011
       maxDate={new Date(2023, 11, 31)}
+      disabled={location.length == 0}
     />
   );
 }

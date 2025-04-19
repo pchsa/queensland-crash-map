@@ -1,9 +1,10 @@
-import { Button, Paper, Title } from "@mantine/core";
+import { ActionIcon, Button, Group, Paper, Space, Title } from "@mantine/core";
 import DateSelect from "./DateSelect";
 import { LocationSelect } from "./LocationSelect";
 import { useCrashStore, useFilterStore } from "../../store";
 import { fetchCrashes } from "../../api";
 import { CrashQuery } from "../../types";
+import { IconInfoCircle } from "@tabler/icons-react";
 
 function Filters() {
   const { location, dateRange } = useFilterStore();
@@ -25,21 +26,19 @@ function Filters() {
   };
 
   return (
-    <Paper
-      pos="absolute"
-      top={20}
-      left={20}
-      p={20}
-      style={{
-        zIndex: 10,
-      }}
-      shadow="md"
-      radius="lg"
-      w={400}
-      withBorder
-    >
-      <Title order={2}>Filters</Title>
+    <Paper shadow="md" radius="lg" w="100%" p={25} withBorder>
+      <Group align="center">
+        <Title order={3} lh={0} mb={4}>
+          Queensland Crash Map
+        </Title>
+        <ActionIcon variant="subtle" color="gray" radius="xl">
+          <IconInfoCircle />
+        </ActionIcon>
+      </Group>
+      <Space h="md" />
       <LocationSelect />
+      <Space h="md" />
+
       <DateSelect />
       <Button onClick={handleSubmit}>Submit</Button>
     </Paper>
