@@ -42,7 +42,7 @@ function GeoLayer() {
               color: "#3388FF",
               weight: 3,
               dashArray: "4 8",
-              fillOpacity: 0.1,
+              fillOpacity: 0.2,
             }).addTo(map);
             // export interface PathOptions extends InteractiveLayerOptions {
             //     stroke?: boolean | undefined;

@@ -7,7 +7,6 @@ import {
   Text,
   Center,
   Loader,
-  Tooltip,
 } from "@mantine/core";
 import {
   IconSparkles,
