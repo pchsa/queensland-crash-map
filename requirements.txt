@@ -1,0 +1,8 @@
+pandas
+numpy
+geopandas
+requests
+sqlalchemy
+psycopg2
+geoalchemy2
+python-dotenv

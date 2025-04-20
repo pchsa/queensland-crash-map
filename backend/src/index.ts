@@ -17,7 +17,7 @@ import {
 } from "./ValidateUtils";
 import { generateChartData } from "./AIChartDataGeneration";
 
-dotenv.config(); // Load .env variables
+dotenv.config({ path: "../.env" }); // Load .env variables
 
 // --- Configure pg Type Parser for BIGINT ---
 const BIGINT_OID = 20;
