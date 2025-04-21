@@ -1,13 +1,11 @@
 import io
 import logging
 import os
-import re
 import shutil
 import tempfile
 import zipfile
 
 import geopandas as gpd
-import numpy as np  # Used indirectly by pandas/geopandas
 import pandas as pd
 import requests
 
