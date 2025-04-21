@@ -253,7 +253,7 @@ AI-generated queries are validated through prompt engineering techniques. The sy
 ## 6. How to Run the Application 🚀
 
 1.  ✅ Ensure Database is running & data loaded.
-2.  ✅ Ensure `backend/.env` is configured.
+2.  ✅ Ensure `.env` is configured.
 3.  **Start Backend:** `cd backend` then `npm run dev`
 4.  **Start Frontend:** Open a _new_ terminal. `cd frontend` then `npm run dev`
 5.  🌍 Open browser to the frontend address.
