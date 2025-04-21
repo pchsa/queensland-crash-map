@@ -39,11 +39,11 @@ function GeoLayer() {
             );
 
             const rectangle = L.rectangle(bounds, {
-              color: "red",
-              weight: 1,
-              fillOpacity: 0.1,
+              color: "#3388FF",
+              weight: 3,
+              dashArray: "4 8",
+              fillOpacity: 0.2,
             }).addTo(map);
-
             layerMap[loc] = rectangle;
           } else {
             const geojson = await fetchSuburbGeoData(loc);

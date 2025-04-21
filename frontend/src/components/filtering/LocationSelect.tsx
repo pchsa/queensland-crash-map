@@ -5,6 +5,7 @@ import {
   Group,
   Pill,
   PillsInput,
+  Title,
   useCombobox,
 } from "@mantine/core";
 import { fetchSuburbNames } from "../../api";
@@ -108,7 +109,7 @@ export function LocationSelect() {
     >
       <Combobox.DropdownTarget>
         <PillsInput
-          label="Choose Location"
+          label={<Title order={5}>Location</Title>}
           onClick={() => combobox.openDropdown()}
         >
           <Pill.Group>

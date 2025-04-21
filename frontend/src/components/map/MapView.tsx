@@ -53,7 +53,7 @@ function MapView() {
         })}
       </MarkerClusterGroup>
 
-      <ZoomControl position="bottomleft" />
+      <ZoomControl position="topright" />
     </MapContainer>
   );
 }
