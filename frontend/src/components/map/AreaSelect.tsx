@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { useFilterStore } from "../../store";
+import { IconX } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
 
 export default function AreaSelect() {
   const map = useMap() as L.Map & { selectArea: { enable: () => void } }; // Extend the Map type
@@ -19,7 +21,40 @@ export default function AreaSelect() {
       const ne = e.bounds.getNorthEast(); // L.LatLng
       const bbox = `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`;
 
-      // Add bounding box and increment counter in one action
+      // Define the bounding box boundaries
+      const boundary = {
+        latMin: -29.79369059202742,
+        latMax: -9.57688718503954,
+        lngMin: 137.36605511389234,
+        lngMax: 155.7755287851727,
+      };
+
+      // Check if the bounding box falls outside the defined boundary
+      if (
+        sw.lat < boundary.latMin ||
+        sw.lat > boundary.latMax ||
+        ne.lat < boundary.latMin ||
+        ne.lat > boundary.latMax ||
+        sw.lng < boundary.lngMin ||
+        sw.lng > boundary.lngMax ||
+        ne.lng < boundary.lngMin ||
+        ne.lng > boundary.lngMax
+      ) {
+        // Most used notification props
+        notifications.show({
+          position: "bottom-center",
+          withCloseButton: true,
+          autoClose: 5000,
+          title: "Bounding Box Out of Bounds",
+          message: `The area you've selected falls outside the allowed boundary.`,
+          color: "red",
+          radius: "lg",
+          icon: <IconX />,
+        });
+        return;
+      }
+
+      // Add bounding box and increment counter if within bounds
       addBoundingBox(bbox);
     };
 

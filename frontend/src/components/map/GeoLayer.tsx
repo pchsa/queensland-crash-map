@@ -38,6 +38,8 @@ function GeoLayer() {
               L.latLng(maxLat, maxLng)
             );
 
+            console.log(bounds);
+
             const rectangle = L.rectangle(bounds, {
               color: "#3388FF",
               weight: 3,
