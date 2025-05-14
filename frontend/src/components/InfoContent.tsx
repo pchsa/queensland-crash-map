@@ -9,7 +9,6 @@ import {
   ThemeIcon,
   Anchor,
   Table, // Import Table
-  ScrollArea, // Import ScrollArea
 } from "@mantine/core";
 import {
   IconMapSearch,
@@ -17,7 +16,6 @@ import {
   IconDatabase,
   IconKeyboard,
   IconPointer,
-  IconTrash,
   IconCategory, // Keep this for the title
 } from "@tabler/icons-react";
 

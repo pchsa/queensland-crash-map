@@ -1,21 +1,11 @@
-import {
-  Center,
-  Paper,
-  ScrollArea,
-  Space,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Paper, Space, Stack, Text, Title } from "@mantine/core";
 import { useCrashStore, useFilterStore } from "../../store";
-import { DonutChart } from "@mantine/charts";
-import HourChart from "./HourChart";
 import AIBarChart from "./AIBarChart";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
 function StatsPanel() {
-  const { crashCount, getHourlyRadarData, getSeverityCounts } = useCrashStore();
+  const { crashCount } = useCrashStore();
   const [dateDisplay, setDateDisplay] = useState("");
   const { dateRange } = useFilterStore();
 

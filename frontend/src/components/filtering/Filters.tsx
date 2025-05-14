@@ -1,12 +1,4 @@
-import {
-  ActionIcon,
-  Button,
-  Group,
-  Modal,
-  Paper,
-  Space,
-  Title,
-} from "@mantine/core";
+import { ActionIcon, Group, Modal, Paper, Space, Title } from "@mantine/core";
 import DateSelect from "./DateSelect";
 import { LocationSelect } from "./LocationSelect";
 import { useCrashStore, useFilterStore } from "../../store";

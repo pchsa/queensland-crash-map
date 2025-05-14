@@ -1,8 +1,6 @@
 # 🗺️ Web Application Project: Queensland Crash Map
 
-
 https://github.com/user-attachments/assets/3b984d82-08b9-4869-9717-5644eae71752
-
 
 ## 1. Project Overview 📝
 
@@ -259,7 +257,7 @@ AI-generated queries are validated through prompt engineering techniques. The sy
 1.  ✅ Ensure Database is running & data loaded.
 2.  ✅ Ensure `.env` is configured.
 3.  **Start Backend:** `cd backend` then `npm run dev`
-4.  **Start Frontend:** Open a _new_ terminal. `cd frontend` then `npm run dev`
+4.  **Start Frontend:** Open a _new_ terminal. `cd frontend` then `npm run build` then `npm run preview`
 5.  🌍 Open browser to the frontend address.
 
 ## 7. Port Usage 🔌
@@ -278,7 +276,3 @@ AI-generated queries are validated through prompt engineering techniques. The sy
   - Data: Queensland Gvoernment Open Data Portal [Road Crash Locations](https://www.data.qld.gov.au/dataset/crash-data-from-queensland-roads/resource/e88943c0-5968-4972-a15f-38e120d72ec0), [Locality Boundaries](https://www.data.qld.gov.au/dataset/locality-boundaries-queensland)
   - Tech: Node.js, Express, React, TypeScript, Leaflet, Mantine UI, Recharts, PostgreSQL, PostGIS, Google Gemini.
   - AI Assistance: ChatGPT used to help write code and documentation.
-
-```
-
-```
