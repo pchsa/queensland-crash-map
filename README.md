@@ -98,8 +98,6 @@ GEMINI_API_KEY=your_google_gemini_api_key
    python download_data.py
    ```
 
-````
-
 2. **Create database & enable PostGIS:**
    Connect to PostgreSQL and run:
 
@@ -287,4 +285,7 @@ AI-generated queries are validated through prompt engineering techniques. The sy
   - Data: Queensland Gvoernment Open Data Portal [Road Crash Locations](https://www.data.qld.gov.au/dataset/crash-data-from-queensland-roads/resource/e88943c0-5968-4972-a15f-38e120d72ec0), [Locality Boundaries](https://www.data.qld.gov.au/dataset/locality-boundaries-queensland)
   - Tech: Node.js, Express, React, TypeScript, Leaflet, Mantine UI, Recharts, PostgreSQL, PostGIS, Google Gemini.
   - AI Assistance: ChatGPT used to help write code and documentation.
-````
+
+```
+
+```
