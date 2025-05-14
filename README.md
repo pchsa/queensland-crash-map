@@ -81,30 +81,41 @@ GEMINI_API_KEY=your_google_gemini_api_key
 
 ### Database Configuration 💾
 
-1.  **Install dependencies & prepare data:**  
-    Run the following in your project root:
+0. **Get Localities Data Download Link**  
+    Downloading the localities data requires getting retrieving a unique download link. [Visit this website](https://qldspatial.information.qld.gov.au/catalogue/custom/search.page?q=%22Locality%20boundaries%20-%20Queensland%22), click Download Dataset for 'Locality boundaries - Queensland' with options 'Shapefile' and 'GDA2020'.
+   <br>Based on the retrieved download link, modify lines 17 & 18 of `download_data.py` to match the unique link. For example:
 
-    ```bash
-    pip install -r requirements.txt
-    python download_data.py
-    ```
+   ```python
+   LOCALITIES_ZIP_URL = "https://spatial-gis.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20250420_220514325118-9388.zip"
+   LOCALITIES_SHAPEFILE_INTERNAL_PATH = "QSC_Extracted_Data_20250420_220514325118-9388/Locality_Boundaries.shp"
+   ```
 
-2.  **Create database & enable PostGIS:**  
-    Connect to PostgreSQL and run:
+1. **Install dependencies & prepare data:**
+   Run the following in your project root:
 
-    ```bash
-    psql -U postgres -d postgres
-    CREATE DATABASE qld_crashes;
-    \c qld_crashes;
-    CREATE EXTENSION IF NOT EXISTS postgis;
-    \q
-    ```
+   ```bash
+   pip install -r requirements.txt
+   python download_data.py
+   ```
 
-3.  **Load data into the database:**  
-    Run the data loader script:
-    ```bash
-    python load_to_db.py
-    ```
+````
+
+2. **Create database & enable PostGIS:**
+   Connect to PostgreSQL and run:
+
+   ```bash
+   psql -U postgres -d postgres
+   CREATE DATABASE qld_crashes;
+   \c qld_crashes;
+   CREATE EXTENSION IF NOT EXISTS postgis;
+   \q
+   ```
+
+3. **Load data into the database:**
+   Run the data loader script:
+   ```bash
+   python load_to_db.py
+   ```
 
 ## 4. Code Structure 📁
 
@@ -178,12 +189,12 @@ WHERE LOWER(L.locality) = LOWER($1);
 
 -`$1`: Suburb name (e.g., 'st lucia', case-insensitive)
 
-**Unexpected Value Handling:**  
+**Unexpected Value Handling:**
 If the suburb doesn't exist or the date format is invalid, the backend will return an error. This is unlikely since the frontend restricts input to valid suburbs.
 
 ### Query 2: Get Crashes by Bounding Box
 
-**Task Description:**  
+**Task Description:**
 This query retrieves crash records that occurred within a user-defined bounding box. It is used in the frontend when the user manually draws a rectangle on the map to specify an area of interest.
 
 **SQL Query (Example):**
@@ -207,12 +218,12 @@ WHERE ST_Within(
 - `$3`: Maximum longitude
 - `$4`: Maximum latitude
 
-**Unexpected Value Handling:**  
+**Unexpected Value Handling:**
 If any of the bounding box coordinates are missing or invalid, the backend will throw an error. In the frontend, an error will be thrown if a bounding box is drawn outside of Queensland.
 
 ### Query 3: Get Crashes by Date Range
 
-**Task Description:**  
+**Task Description:**
 This query retrieves crash records that occurred within a specified date range, grouped by month and year. It is used to filter crashes temporally based on user-selected start and end dates.
 
 **SQL Query (Example):**
@@ -230,12 +241,12 @@ WHERE DATE_TRUNC('month', TO_DATE(crash_month || ' ' || crash_year, 'Month YYYY'
 - `$1`: Start date in `'YYYY-MM'` format (e.g., `'2023-01'`)
 - `$2`: End date in `'YYYY-MM'` format (e.g., `'2023-12'`)
 
-**Unexpected Value Handling:**  
+**Unexpected Value Handling:**
 If the date format is invalid or out of range, the backend will return an error. This is unlikely in practice as the frontend enforces proper date formatting and range selection.
 
 ### Query 4: AI-Generated Chart Query
 
-**Task Description:**  
+**Task Description:**
 This query is dynamically generated using AI based on a user's natural language prompt. It builds on the existing filtering logic (by suburb, bounding box, and date range) by wrapping into CTE `filtered_crashes`. The AI then generates a specific aggregation or transformation based on the user's intent, such as showing crash severity distributions.
 
 **SQL Query (Example):**
@@ -249,7 +260,7 @@ ORDER BY count DESC
 LIMIT 10;
 ```
 
-**Unexpected Value Handling:**  
+**Unexpected Value Handling:**
 AI-generated queries are validated through prompt engineering techniques. The system first analyzes the user's prompt to check if it can be answered using the available dataset structure and values. It rejects invalid inputs—such as unsupported columns, irrelevant content, or improperly scoped questions—with specific error messages. If the query is valid, the system dynamically generates only the relevant SQL fragment (e.g., `SELECT ... FROM filtered_crashes ...`) based on the user's intent. This ensures that output is always aligned with the dataset's capabilities and frontend filtering constraints.
 
 ## 6. How to Run the Application 🚀
@@ -276,3 +287,4 @@ AI-generated queries are validated through prompt engineering techniques. The sy
   - Data: Queensland Gvoernment Open Data Portal [Road Crash Locations](https://www.data.qld.gov.au/dataset/crash-data-from-queensland-roads/resource/e88943c0-5968-4972-a15f-38e120d72ec0), [Locality Boundaries](https://www.data.qld.gov.au/dataset/locality-boundaries-queensland)
   - Tech: Node.js, Express, React, TypeScript, Leaflet, Mantine UI, Recharts, PostgreSQL, PostGIS, Google Gemini.
   - AI Assistance: ChatGPT used to help write code and documentation.
+````
