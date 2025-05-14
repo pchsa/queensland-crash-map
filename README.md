@@ -263,11 +263,11 @@ AI-generated queries are validated through prompt engineering techniques. The sy
 ## 7. Port Usage 🔌
 
 - **Backend:** `3000` (configurable via `.env`)
-- **Frontend:** `5173` (Vite default)
+- **Frontend:** `4173` (Vite default)
 
 ## 8. UI Address 💻
 
-- `http://localhost:5173`
+- `http://localhost:4173`
 
 ## 9. Additional Notes 💡
 
