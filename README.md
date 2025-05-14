@@ -271,7 +271,7 @@ AI-generated queries are validated through prompt engineering techniques. The sy
 
 ## 9. Additional Notes 💡
 
-- **Assumptions:** Working PostgreSQL/PostGIS, Node.js/npm installed, correct DB/API keys configured.
+- **Assumptions:** Working PostgreSQL/PostGIS, Node.js/npm installed, Python installed, correct DB/API keys configured.
 - **Acknowledgements 🙏:**
   - Data: Queensland Gvoernment Open Data Portal [Road Crash Locations](https://www.data.qld.gov.au/dataset/crash-data-from-queensland-roads/resource/e88943c0-5968-4972-a15f-38e120d72ec0), [Locality Boundaries](https://www.data.qld.gov.au/dataset/locality-boundaries-queensland)
   - Tech: Node.js, Express, React, TypeScript, Leaflet, Mantine UI, Recharts, PostgreSQL, PostGIS, Google Gemini.
